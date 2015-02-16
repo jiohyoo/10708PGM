@@ -7,6 +7,9 @@
 % If you rely on Latex2e packages, like most moden people use this:
 \documentclass{article}
 
+% ams packages
+\usepackage{amsmath,amsfonts,amssymb}
+
 % use Times
 \usepackage{times}
 % For figures
@@ -70,6 +73,33 @@
 ]
 
 \section{Project Idea}
+
+In molecular biology, it is believed that genetic variations in a gene changes the expression of the corresponding protein, and this effect further propagates the expression pathway of the other related genes. Analyzing the mappings of genetic variations including SNPs to the expression rates of the related genes have been carried out to identify the genetic variations in direct or indirect relationship with the occurrence of certain diseases, or construct a predictor of the diseases based on the given SNPs. For our project, we would like to improve the method of learning SNP-gene network by adopting the conditional undirected mixed graphical model that can embed both discrete and continuous variables.
+
+Following Lee and coworkers \cite{lee2013structure}, joint distribution of a mixed graphical model with parameter $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\beta_{st}\}]$ can be expressed as:
+
+\begin{align}
+p(x, y ; \Theta) \propto \exp \Big( &\sum_{k=1}^{q} \sum_{l=1}^{q} \phi_{kl} (x_k, x_l) \nonumber \\
++ \sum_{k=1}^{p} \sum_{s=1}^{q} \rho_{ks}(x_k) y_s  &+ \sum_{s=1}^{p} \alpha_s y_s + \sum_{s=1}^{p} \sum_{t=1}^{q} -\frac{1}{2} \beta_{st} y_s y_t \Big)
+\end{align} 
+
+where $x_1, ... x_p$ are discrete variables representing the occurrences for each SNP and $y_1, ..., y_q$ are continuous variables representing the gene expression rate of each gene. As our main focus is on learning the model given the SNPs, conditional mixed graphical model on SNPs can learn the network more efficiently by avoiding learning the full joint distribution. The conditional distribution is:
+
+\begin{align}
+p(y|x) &= \mathcal{N}(B^{-1}\gamma(x), B^{-1}) \label{eq:cond_prob}\\
+\{\gamma(x)\}_s &= \alpha_s + \sum_{k} \rho_{ks}(x_k) \\
+p(x) &\propto \exp \Big( \sum_{k} \sum_{l} \phi_{kl}(x_k, x_l) + \frac{1}{2} \gamma(x))^\intercal B^{-1} \gamma(x) \Big)
+\end{align}
+
+where $B$ is a symmetric, positive definite inverse covariance matrix $B = \{ \beta_{st}\}$.
+
+The log probability and our objective function are from the property of multivariate Gaussian distribution:
+\begin{align}
+\log p(x| y; \Theta) &= -\frac{1}{2}\log |B^{-1}| -\frac{k}{2} (2 \pi) \nonumber \\
+& -\frac{1}{2} (y - B^{-1} \gamma(x)^\intercal B (y - B^{-1} \gamma(x)) \\
+l_p(X, Y, \Theta) &= -\frac{1}{2} tr\Big((Y - B^{-1} \Gamma(X))^\intercal B (Y - B^{-1} \Gamma(X)) \Big) \nonumber \\
+& -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\alpha_s\}\|_1 + \lambda_3 \|\{\rho_{ks}\}\|_1 \label{eq:obj}
+\end{align}
 
 \section{Literature Review}
 \label{LiteratureReview}
