@@ -72,6 +72,67 @@
 \section{Project Idea}
 
 \section{Literature Review}
+\label{LiteratureReview}
+
+There have been various types of solutions to the problem of learning SNP-gene network. One popular solution is to solve the problem as multi-task regression.
+Given SNP information as inputs, the goal is to find the regression parameters that can map the input to the outputs of gene expressions, which can reveal the structured sparsity in input and output as well.
+
+%Previous works on learning SNP-gene network have been taking various approaches. One popular approach is to think of the problem as multi-task regression problem. 
+
+
+
+
+In \cite{kim2010tree}, the authors proposed a tree-guided group lasso, or GFlasso algorithm, where they applied it to SNP-gene data, and proved success in prediction of the structure.
+GFlasso solves the sparse multi-task regression problem assuming the output has a tree structure. 
+%Outputs are represented as leaf nodes and the clusters of outputs as internal nodes.
+GFlasso aims to learn the common set of inputs for each cluster of outputs, using group lasso penalty and systematic weighting scheme for inputs, where inputs are grouped together to be mapped to the outputs, and output clusters with strong correlation are guided to share common input groups.
+%Using group lasso penalty and weighting scheme, inputs are grouped together to be mapped to the outputs, and output clusters with strong correlation are guided to share common input groups.
+%GFlasso was applied to simulated data and SNP-gene data of yeast, and proved improved performance in terms of prediction error, compared to conventional lasso.
+Although GFlasso takes into account of the nature of SNP-gene data, it requires the prior knowledge of output tree structure, which is not always possible.
+Also, the weighting scheme of guiding the common set of inputs for highly correlated clusters is such a strong assumption that is not so natural and may not be true in reality.
+
+An algorithm that learns both regression parameters and output structure without prior knowledge was introduced in \cite{rothman2010sparse}. The authors proposed multivariate regression with covariance estimation (MRCE) algorithm, where they aim to learn both multivariate regression parameters and the correlation of outputs. 
+MRCE adopts the conventional regression format with regularization for regression parameter matrix and correlation matrix of outputs.
+Because of this formulation, the MRCE solve bi-convex problem, which may not lead to the global optimum. Although MRCE is favorable in a way that it learns the output structure, MRCE does not force structured sparsity when learning regression parameters for inputs, unlike GFlasso.
+%Unlike GFlasso, which guides common set of inputs for correlated output clusters to learn structured sparsity in inputs, 
+MRCE regularizes regression parameters and correlation matrix separately without any constraints on the regression parameters. This does not coincide with the nature of SNP-gene data, where structure sparsity is assumed.
+
+
+
+The authors in \cite{sohn2012joint} proposed an algorithm that bring together the advantages of the works in \cite{kim2010tree} and \cite{rothman2010sparse}. In \cite{sohn2012joint}, an algorithm for joint learning of regression parameters and output structure with constraint of structure sparsity in inputs was introduced. The authors relate the multiple output regression with conditional Gaussian graphical model, and show how the regression parameter can be formulated using the inverse covariance matrix of the conditional Gaussian graph model. By regularizing two inverse covariance parameters that concerns the correlation between the input and output, and that of output, the algorithm enforces structure sparsity in input, as it learns the output structure and the regression parameters.
+Although proposed algorithm resolves the main problems in previous studies, it still has a problem in its assumption that input and output are treated as continuous data. 
+However, this is not true when dealing with SNP-gene data. While output is continuous, input is discrete.
+Therefore, it leaves some space for further refinement of the assumptions used in this algorithm.
+
+
+
+
+
+
+
+
+
+In order to solve the problem in more natural way, we can think of incorporating the concept of 'mixed graphical models' into our problem.
+Mixed graphical models refer to graphical models that allow for both discrete and continuous variables. Mixed graphical model was studied to various types of data we wish to learn via graph models, which are often combination of both discrete and continuous.
+This specific type of models was first introduced in \cite{lauritzen1989graphical}, and recently re-introduced and developed in \cite{lee2013structure}.
+
+
+
+In \cite{lauritzen1989graphical}, the notion of mixed graphical models was first introduced. The authors proposed a mixed graphical model for variables of both discrete and continuous. The proposed algorithm is a general algorithm that is carefully designed for various cases that involve chain models, recursive models, and Markov models, with both directed and undirected models. The authors provide intuition of representing mixed graphical models in forms of conditional Gaussian models which can be related to regression problems. Although this mixed graphical model is able to be applied to general cases, this makes resulting conditional distribution complex. Also, the mean and covariance matrices exist for every possible configurations of states of discrete variables, which results in exponential increase in number of parameters to learn depending on the number of discrete variables.
+
+
+
+Later in \cite{lee2013structure}, the mixed graphical model was further developed into more simplified and intuitive version. The authors proposed a mixed graphical model that provides intuitive forms of conditional distributions: conditional distribution of a discrete variable reduces to multi-class logistic regression, and that of a continuous variable to Gaussian linear regression. 
+%Also, the proposed model reduces to pairwise discrete Markov random field when there are only discrete variables, and to multivariate Gaussian for continuous variables only. 
+By making assumptions on the general mixed graphical models in \cite{lauritzen1989graphical}, proposed algorithm scales up more efficiently: it has one common covariance matrix, and mean that is computed by addition of discrete variables.
+
+
+To our knowledge, there has not been any previous study that learns the SNP-gene network as multi-task regression problem which has a format of mixed graphical models. 
+In this project, we would like to extend the basic concepts in \cite{sohn2012joint} using \cite{lee2013structure}, so that we have more natural way of solving the problem, which is expected to be beneficial to the performance of the structure learning.
+
+
+
+
 
 \section{Dataset}
 
@@ -83,6 +144,9 @@ Let's ask Prof. Kim
 
 \section{Plan of Activities}
 Plan of activities goes here
+
+
+\clearpage
 
 \nocite{*}
 \bibliographystyle{icml2015}
