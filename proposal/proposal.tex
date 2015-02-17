@@ -95,10 +95,10 @@ where $B$ is a symmetric, positive definite inverse covariance matrix $B = \{ \b
 
 The log probability and our objective function are from the property of multivariate Gaussian distribution:
 \begin{align}
-\log p(y|x; \Theta) &= -\frac{1}{2}\log |B^{-1}| -\frac{k}{2} (2 \pi) \nonumber \\
+\log p(y | x; \Theta) &= -\frac{1}{2}\log |B^{-1}| -\frac{k}{2} (2 \pi) \nonumber    \\
 & -\frac{1}{2} (y - B^{-1} \gamma(x)^\intercal B (y - B^{-1} \gamma(x)) \\
 l_p(X, Y, \Theta) &= -\frac{1}{2} tr\Big((Y - B^{-1} \Gamma(X))^\intercal B (Y - B^{-1} \Gamma(X)) \Big) \nonumber \\
-& -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\alpha_s\}\|_1 + \lambda_3 \|\{\rho_{ks}\}\|_1 \label{eq:obj}
+& -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\rho_{ks}\}\|_1 \label{eq:obj}
 \end{align}
 
 \section{Literature Review}
