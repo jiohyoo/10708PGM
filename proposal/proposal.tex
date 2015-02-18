@@ -74,16 +74,16 @@
 
 \section{Project Idea}
 
-In molecular biology, it is believed that genetic variations in a gene changes the expression of the corresponding protein, and this effect further propagates the expression pathway of the other related genes. Analyzing the mappings of genetic variations including SNPs to the expression rates of the related genes has been carried out to identify the genetic variations in direct or indirect relationship with the occurrence of certain diseases, or construct a predictor of the diseases based on the given SNPs. For our project, we would like to improve the method of learning SNP-gene network by adopting the conditional undirected mixed graphical model that can embed both discrete and continuous variables.
+In molecular biology, it is believed that genetic variations, such as SNPs, change the expression of the corresponding protein, and these effects further propagate through the expression pathway of the other related genes. Multiple regression analysis of a relationship between SNPs and gene expression rates has been conducted to identify the genetic variations in a direct or indirect relationship with gene expressions of interests, or construct a predictor of the diseases based on the given SNPs (summarized in \ref{LiteratureReview}). For our project, we would like to improve the method of learning SNP-gene network by adopting the conditional undirected mixed graphical model in which we can embed both discrete variables for SNPs and continuous variables for gene expression rates.
 
-Following Lee and coworkers \cite{lee2013structure}, joint distribution of a mixed graphical model with parameter $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\beta_{st}\}]$ can be expressed as:
+Following Lee and coworkers \cite{lee2013structure}, the joint distribution of a mixed graphical model with parameters $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\beta_{st}\}]$ can be expressed as:
 
 \begin{align}
 p(x, y ; \Theta) \propto \exp \Big( &\sum_{k=1}^{q} \sum_{l=1}^{q} \phi_{kl} (x_k, x_l) \nonumber \\
 + \sum_{k=1}^{p} \sum_{s=1}^{q} \rho_{ks}(x_k) y_s  &+ \sum_{s=1}^{p} \alpha_s y_s + \sum_{s=1}^{p} \sum_{t=1}^{q} -\frac{1}{2} \beta_{st} y_s y_t \Big)
 \end{align} 
 
-where $x_1, ... x_p$ are discrete variables representing the occurrences for each SNP and $y_1, ..., y_q$ are continuous variables representing the gene expression rate of each gene. As our main focus is on learning the model given the SNPs, conditional mixed graphical model on SNPs can learn the network more efficiently by avoiding learning the full joint distribution. The conditional distribution is:
+where $x_1, ... x_p$ are discrete variables representing the occurrences for each SNP and $y_1, ..., y_q$ are continuous variables representing the gene expression rate of each gene. As our main focus is on learning the conditional model given observed SNPs, conditional mixed graphical model on SNPs can learn the network more efficiently by avoiding learning the full joint distribution. The conditional distribution is:
 
 \begin{align}
 p(y|x) &= \mathcal{N}(B^{-1}\gamma(x), B^{-1}) \label{eq:cond_prob}\\
@@ -100,6 +100,8 @@ The log probability and our objective function are from the property of multivar
 l_p(X, Y, \Theta) &= -\frac{1}{2} tr\Big((Y - B^{-1} \Gamma(X))^\intercal B (Y - B^{-1} \Gamma(X)) \Big) \nonumber \\
 & -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\rho_{ks}\}\|_1 \label{eq:obj}
 \end{align}
+
+The parameter $\Theta^*$ that minimizes this L-1 penalized log-likelihood will give us a sparse and consistent estimator, and by comparing the parameters with results in multi-task regression settings, we can analyze the existence of direct and indirect relationship between SNPs and gene expression rates.
 
 \section{Literature Review}
 \label{LiteratureReview}
@@ -156,17 +158,15 @@ In this project, we would like to extend the basic concepts proposed by Sohn  \c
 
 
 \section{Dataset}
-
-\subsection{Synthetic Dataset}
-Might need to talk about synthetic dataset..
-
-\subsection{Human Liver Cohort Study}
-Let's ask Prof. Kim
+We plan to test our method on both synthetic and real dataset. For synthetic dataset, we first will generate gene expression rates and SNPs on randomly selected parameters $\Theta$ varying the sparsity of $\Theta$ and the size of the dataset. For real dataset, we will apply our method to Human Liver Cohort Study data \cite{sohn2012joint}.
 
 \section{Plan of Activities}
-\subsection{Convexity of the log-likelihood}
+\subsection{Convex Optimization}
+We first need to convert Eq. \ref{eq:obj} into a convex optimization problem, and try to derive a simpler formula to efficiently calculate the log-likelihood and other quantities of interests including the gradient of the conditional log-likelihood and pseudo-likelihood if needed. Then, we will try at least two optimization methods for our problem and analyze the performance on synthetic dataset to find the best performing method.
 
-\subsection{Optimization Method}
+\subsection{Performance analysis on Real Dataset}
+After finding the best optimization method, we will apply our method to Human Liver Cohort Study data and analyze the performance in both accuracy and computation time in comparison to the methods introduced in the previous research \cite{sohn2012joint}.
+
 
 
 
