@@ -33,9 +33,31 @@ for line in open(fileName,'r'):
 # fileOut.close()
 
 fileOut = open('Exp_Out.txt', 'w')
-
 for x in range(0, len(Exp)):
     for y in range(0, len(Exp[x])):
         fileOut.write(str(Exp[x][y]) + " ")
     fileOut.write("\n")
+fileOut.close()
+
+
+fileOut = open('PatientID_Out.txt', 'w')
+for x in range(0, len(patient_ID)):
+    fileOut.write(str(patient_ID[x]) + "\n")
+fileOut.close()
+
+
+fileOut = open('ProteinID_Out.txt', 'w')
+for x in range(0, len(protein_ID)):
+    fileOut.write(str(protein_ID[x]) + "\n")
+fileOut.close()
+
+fileOut = open('ProteinName_Out.txt', 'w')
+for x in range(0, len(protein_name)):
+    fileOut.write(str(protein_name[x]) + "\n")
+fileOut.close()
+
+
+fileOut = open('Data_info.txt', 'w')
+fileOut.write("# of patients: " + str(N_pat) + "\n")
+fileOut.write("# of features: " + str(len(Exp)) + "\n")
 fileOut.close()
