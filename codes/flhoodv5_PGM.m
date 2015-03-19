@@ -11,7 +11,7 @@
 %D=n by Ltot matrix
 
 % function fval= flhoodv5_PGM(beta,betad,theta,phi,alpha1,alpha2,D,X,Y,L,n,p,q)
-function fval= flhoodv5_PGM(beta,betad,theta,alpha1,D,X,L,n)
+function fval= flhoodv5_PGM(beta,betad,theta,alpha1,D,X,L,n,p,q);
 
 if sum(betad<0)>0
      fval=10^50;
@@ -20,29 +20,28 @@ end
 fval = 0;
 sqloss = 0;
 e = ones(n,1);
-Lsum = [0;cumsum(L)];
+% Lsum = [0;cumsum(L)];
 
     
 %% zero out  diagonal
-% beta=beta-diag(diag(beta));
+beta=beta-diag(diag(beta));
 % for r=1:q
 %     phi(Lsum(r)+1:Lsum(r+1),Lsum(r)+1:Lsum(r+1))=0;
 % end
-% beta=triu(beta); 
+beta=triu(beta); 
 % phi=triu(phi);
-% beta=beta+beta';
+beta=beta+beta';
 % phi=phi+phi';
 %% cache quantities
-% Xbeta = X * beta * diag(1./betad);
-% Dtheta = D * theta * diag(1 ./ betad);
-Gmean = (e * alpha1' + D * theta) / beta; % n by p
+Xbeta = X * beta * diag(1./betad);
+Dtheta = D * theta * diag(1 ./ betad);
 %% square loss 
-% sqloss=-n/2*sum(log(betad))+...
-%     .5*norm((X-e*alpha1'-Xbeta-Dtheta)*diag(sqrt(betad)),'fro')^2; % the matrix is n by p
+sqloss=-n/2*sum(log(betad))+...
+    .5*norm((X-e*alpha1'-Xbeta-Dtheta)*diag(sqrt(betad)),'fro')^2; % the matrix is n by p
 % sqloss = - n / 2 * sum(log(betad)) + ...
 %     .5 * norm((X - e*alpha1' - Dtheta) * diag(sqrt(betad)),'fro')^2; % the matrix is n by p
-sqloss = 1/2 * trace((X - Gmean)' * (beta) * (X - Gmean)) + ...
-    n/2 * log(det(inv(beta)));
+% sqloss = 1/2 * trace((X - Gmean)' * (beta) * (X - Gmean)) + ...
+%     n/2 * log(det(inv(beta)));
 
 %% Do categorical loss
 % catloss=0;

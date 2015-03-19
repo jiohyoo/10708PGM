@@ -1,0 +1,12 @@
+function x=paramToVecv5_PGM(beta,betad,theta,alpha1,L,n,p,q)
+Ltot=sum(L);
+sizes=[p^2 p p*Ltot p];
+sums=cumsum(sizes); 
+x=zeros(sum(sizes),1);
+x(1:p^2)=beta(:);
+x(sums(1)+1:sums(2))=betad(:);
+x(sums(2)+1:sums(3))=theta(:);
+% x(sums(3)+1:sums(4))=phi(:);
+% x(sums(4)+1:sums(5))=alpha1(:);
+% x(sums(5)+1:sums(6))=alpha2(:);
+x(sums(3)+1:sums(4))=alpha1(:);
