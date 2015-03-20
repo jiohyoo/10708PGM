@@ -1,0 +1,16 @@
+ToyData.mat:
+
+(essential data)
+n: number of samples.
+p: number of continuous variables.
+q: number of discrete variables.
+L: a vector of size p by 1. L(i) means the number of states for ith discrete variable. (for ToyData, there are two states for each of the discrete variable.)
+X: Output data (continuous data). n by p mtrx.
+Y: Input data (discrete data). n by q mtrx. Y(i,j) value indicates the index of state active for jth discrete variable of ith sample. (e.g. Y(1,3)=2, so the active state of the 3rd discrete variable of 1st sample is 2)
+
+
+(additional data)
+D: Processed form of input data Y. n by (q .* L) binary mtrx. D(i, (j-1)*L(j)+1:(j-1)*L(j)+L(j)) means a row vector of size 1 by L(j), where Y(i,j)th element is 1 (the index of element with value 1 indicates the activated state) for jth discrete variable of ith sample. (e.g. D(5, 1:2) is a row vector of size 1 by 2, where one of element is 1 and the rest are 0s. The index of the element with value 1 is the activated state for 1st discrete variable of 5th sample. D(5, 3:4) is same for 2nd discrete variable of 5th sample. If D(5, 1:2) = [0 1], then Y(5,1) = 2.)
+thcts: ground-truth continuous network.
+maskDisCts: ground-truth continous-discrete network.
+maskDis: ground-truth discrete network.

@@ -8,37 +8,43 @@ close all
 addpath(genpath('./UGM_2009')); 
 addpath(genpath('./TFOCS-1.3.1'));
 addpath(genpath('./pnopt-0.9-rc'));
-%% Graph parameters
-p=10; % number of cts variables
-q=10; % number of discrete variables
-n=2000; % sample size
+% % % %% Graph parameters
+% % % p=10; % number of cts variables
+% % % q=10; % number of discrete variables
+% % % n=2000; % sample size
+% % % e=ones(n,1);
+% % % L=2*ones(q,1); % levels in each categorical variable
+% % % Ltot=sum(L);
+% % % %% Create params
+% % % rhocts=.25;
+% % % thcts=eye(p);
+% % % for i=1:p-1
+% % %     thcts(i,i+1)=rhocts;
+% % %     thcts(i+1,i)=rhocts;
+% % % end
+% % % 
+% % % thdiscts=cell(p,q);
+% % % maskDisCts=sparse(p,q);
+% % % for i=1:min(p,q)
+% % %     rhocd=.5;
+% % %     maskDisCts(i,i)=1;
+% % %     thdiscts{i,i}=[rhocd; -rhocd];
+% % % end
+% % % 
+% % % thdis=cell(q,q);
+% % % maskDis = sparse(diag(ones(q-1,1),1));
+% % % [R J]=find(maskDis);
+% % % for e=1:length(R)
+% % %         thdis{R(e),J(e)}=.5*[1 -1; -1 1]; % attractive
+% % % end
+% % % %% sample
+% % % mixSample;
+% % % save ToyData X Y D p q L n thcts maskDisCts maskDis
+
+
+load ToyData X Y D p q L n thcts maskDisCts maskDis
 e=ones(n,1);
-L=2*ones(q,1); % levels in each categorical variable
 Ltot=sum(L);
-%% Create params
-rhocts=.25;
-thcts=eye(p);
-for i=1:p-1
-    thcts(i,i+1)=rhocts;
-    thcts(i+1,i)=rhocts;
-end
-
-thdiscts=cell(p,q);
-maskDisCts=sparse(p,q);
-for i=1:min(p,q)
-    rhocd=.5;
-    maskDisCts(i,i)=1;
-    thdiscts{i,i}=[rhocd; -rhocd];
-end
-
-thdis=cell(q,q);
-maskDis = sparse(diag(ones(q-1,1),1));
-[R J]=find(maskDis);
-for e=1:length(R)
-        thdis{R(e),J(e)}=.5*[1 -1; -1 1]; % attractive
-end
-%% sample
-mixSample;
 %% Init opt variables
 theta=zeros(Ltot,p); % cts-dis params
 beta=zeros(p,p); % negative of the precision matrix
