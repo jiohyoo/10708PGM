@@ -18,6 +18,7 @@ n = data.n
 p = data.p  % number of conti var
 q = data.q  % number of discrete var
 
+
 % preprocessing data
 for t = 1:p
     X{t} = zscore(data.Y);                  % normalization
@@ -27,10 +28,20 @@ end
 
 % split data into training and testing.
 training_percent = 0.8;
-[X_tr, Y_tr, X_te, Y_te] = mtSplitPerc(X, Y, training_percent);
+n_tr = floor(n * training_percent);
+n_te = n - n_tr;
+rand_perm = randperm(n);
+for t = 1:p
+	X_tr{t} = X{t}(rand_perm(1:n_tr), :);
+	X_te{t} = X{t}(rand_perm(n_tr+1:end), :);
+
+	Y_tr{t} = Y{t}(rand_perm(1:n_tr));
+	Y_te{t} = Y{t}(rand_perm(n_tr+1:end));
+end
+
 
 % the function used for evaluation.
-eval_func_str = 'eval_MTL_mse';
+eval_func_str = 'eval_mse';
 higher_better = false;  % mse is lower the better.
 
 % cross validation fold
@@ -53,5 +64,5 @@ fprintf('Perform model selection via cross validation: \n')
 W = Least_L21(X_te, Y_te, best_param, opts);
 
 % show final performance
-final_performance = eval_MTL_mse(Y_te, X_te, W);
+final_performance = eval_mse(Y_te, X_te, W);
 fprintf('Performance on test data: %.4f\n', final_performance);
