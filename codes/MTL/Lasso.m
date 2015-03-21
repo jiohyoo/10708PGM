@@ -1,4 +1,4 @@
-% Multi task Lasso with L1/L2 regularization
+% Naive Lasso with L1
 % TODO List:
 % 1) LOAD DATA- Fill in X, Y
 % 2) Set Train/Test set ratio
@@ -9,6 +9,7 @@
 clear; clc;
 
 addpath(genpath('.'));
+
 
 % loading data
 data = open('./../ToyData.mat')
@@ -45,12 +46,12 @@ param_range = [0.001 0.01 0.1 1 10 100 1000 10000];
 
 fprintf('Perform model selection via cross validation: \n')
 [ best_param perform_mat] = CrossValidation1Param...
-    ( X_tr, Y_tr, 'Least_L21', opts, param_range, cv_fold, eval_func_str, higher_better);
+    ( X_tr, Y_tr, 'Least_Lasso', opts, param_range, cv_fold, eval_func_str, higher_better);
 
 %disp(perform_mat) % show the performance for each parameter.
 
 % build model using the optimal parameter 
-W = Least_L21(X_te, Y_te, best_param, opts);
+W = Least_Lasso(X_te, Y_te, best_param, opts);
 
 % show final performance
 final_performance = eval_MTL_mse(Y_te, X_te, W);
