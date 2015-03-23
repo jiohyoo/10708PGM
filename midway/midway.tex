@@ -1,0 +1,201 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% ICML 2015 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Use the following line _only_ if you're still using LaTeX 2.09.
+%\documentstyle[icml2015,epsf,natbib]{article}
+% If you rely on Latex2e packages, like most moden people use this:
+\documentclass{article}
+
+% ams packages
+\usepackage{amsmath,amsfonts,amssymb}
+
+% use Times
+\usepackage{times}
+% For figures
+\usepackage{graphicx} % more modern
+%\usepackage{epsfig} % less modern
+\usepackage{subfigure} 
+
+% For citations
+\usepackage{natbib}
+
+% For algorithms
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% As of 2011, we use the hyperref package to produce hyperlinks in the
+% resulting PDF.  If this breaks your system, please commend out the
+% following usepackage line and replace \usepackage{icml2015} with
+% \usepackage[nohyperref]{icml2015} above.
+\usepackage{hyperref}
+
+% Packages hyperref and algorithmic misbehave sometimes.  We can fix
+% this with the following command.
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Employ the following version of the ``usepackage'' statement for
+% submitting the draft version of the paper for review.  This will set
+% the note in the first column to ``Under review.  Do not distribute.''
+%\usepackage{icml2015} 
+
+% Employ this version of the ``usepackage'' statement after the paper has
+% been accepted, when creating the final version.  This will set the
+% note in the first column to ``Proceedings of the...''
+\usepackage[accepted]{icml2015}
+
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{10-708 PGM Project Midway Report: Learning SNP-Gene Network Using Mixed Graphical Model}
+
+\begin{document} 
+
+\twocolumn[
+\icmltitle{10-708 PGM Project Midway Report \\ 
+           Learning SNP-Gene Network Using Mixed Graphical Model}
+
+% It is OKAY to include author information, even for blind
+% submissions: the style file will automatically remove it for you
+% unless you've provided the [accepted] option to the icml2015
+% package.
+\icmlauthor{Hyun Ah Song}{hyunahs@andrew.cmu.edu}
+\icmladdress{Machine Learning Department, Carnegie Mellon University, Pittsburgh, PA 15213}
+\icmlauthor{Ji Oh Yoo}{jiohy@andrew.cmu.edu}
+\icmladdress{Computer Science Department, Carnegie Mellon University, Pittsburgh, PA 15213}
+
+% You may provide any keywords that you 
+% find helpful for describing your paper; these are used to populate 
+% the "keywords" metadata in the PDF but will not be shown in the document
+\icmlkeywords{boring formatting information, machine learning, ICML}
+
+\vskip 0.3in
+]
+
+\section{Introduction}
+
+\section{Background \& Literature Review}
+\label{LiteratureReview}
+
+\section{Method}
+
+\section{Experiment}
+
+\section{Conclusion}
+
+
+
+\section{FROM PROPOSAL}
+In molecular biology, it is believed that genetic variations, such as SNPs, change the expression of the corresponding protein, and these effects further propagate through the expression pathway of the other related genes. Multiple regression analysis of a relationship between SNPs and gene expression rates has been conducted to identify the genetic variations in a direct or indirect relationship with gene expressions of interests, or construct a predictor of the diseases based on the given SNPs (summarized in \ref{LiteratureReview}). For our project, we would like to improve the method of learning SNP-gene network by adopting the conditional undirected mixed graphical model in which we can embed both discrete variables for SNPs and continuous variables for gene expression rates.
+
+Following Lee and coworkers \cite{lee2013structure}, the joint distribution of a mixed graphical model with parameters $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\beta_{st}\}]$ can be expressed as:
+
+\begin{align}
+p(x, y ; \Theta) \propto \exp \Big( &\sum_{k=1}^{q} \sum_{l=1}^{q} \phi_{kl} (x_k, x_l) \nonumber \\
++ \sum_{k=1}^{p} \sum_{s=1}^{q} \rho_{ks}(x_k) y_s  &+ \sum_{s=1}^{p} \alpha_s y_s + \sum_{s=1}^{p} \sum_{t=1}^{q} -\frac{1}{2} \beta_{st} y_s y_t \Big)
+\end{align} 
+
+where $x_1, ... x_p$ are discrete variables representing the occurrences for each SNP and $y_1, ..., y_q$ are continuous variables representing the gene expression rate of each gene. As our main focus is on learning the conditional model given observed SNPs, conditional mixed graphical model on SNPs can learn the network more efficiently by avoiding learning the full joint distribution. The conditional distribution is:
+
+\begin{align}
+p(y|x) &= \mathcal{N}(B^{-1}\gamma(x), B^{-1}) \label{eq:cond_prob}\\
+\{\gamma(x)\}_s &= \alpha_s + \sum_{k} \rho_{ks}(x_k) \\
+p(x) &\propto \exp \Big( \sum_{k} \sum_{l} \phi_{kl}(x_k, x_l) + \frac{1}{2} \gamma(x))^\intercal B^{-1} \gamma(x) \Big)
+\end{align}
+
+where $B$ is a symmetric, positive definite inverse covariance matrix $B = \{ \beta_{st}\}$.
+
+The log probability and our objective function are from the property of multivariate Gaussian distribution:
+\begin{align}
+\log p(y | x; \Theta) &= -\frac{1}{2}\log |B^{-1}| -\frac{k}{2} (2 \pi) \nonumber    \\
+& -\frac{1}{2} (y - B^{-1} \gamma(x)^\intercal B (y - B^{-1} \gamma(x)) \\
+l_p(X, Y, \Theta) &= -\frac{1}{2} tr\Big((Y - B^{-1} \Gamma(X))^\intercal B (Y - B^{-1} \Gamma(X)) \Big) \nonumber \\
+& -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\rho_{ks}\}\|_1 \label{eq:obj}
+\end{align}
+
+The parameter $\Theta^*$ that minimizes this L-1 penalized log-likelihood will give us a sparse and consistent estimator, and by comparing the parameters with results in multi-task regression settings, we can analyze the existence of direct and indirect relationship between SNPs and gene expression rates.
+
+\section{Literature Review}
+
+There have been various types of solutions to the problem of learning SNP-gene network. One popular solution is to solve the problem as multi-task regression.
+Given SNP information as inputs, the goal is to find the regression parameters that can map the input to the outputs of gene expressions, which can reveal the structured sparsity in input and output as well.
+
+
+
+
+Tree-guided group lasso, or GFlasso was proposed by Kim and coworkers \cite{kim2010tree}.
+GFlasso aims to learn the common set of inputs for each cluster of outputs, using group lasso penalty and systematic weighting scheme for inputs, where inputs are grouped together to be mapped to the outputs, and output clusters with strong correlation are guided to share common input groups.
+GFlasso requires the prior knowledge of output tree structure, which is not always possible.
+Also, the weighting scheme of guiding the common set of inputs for highly correlated clusters is such a strong assumption that may not be true in reality.
+
+
+An algorithm called multivariate regression with covariance estimation (MRCE) that aims to learn both multivariate regression parameters and the correlation of outputs was introduced by Rothman and coworkers \cite{rothman2010sparse}.
+By regularizing regression parameter and correlation matrix separately, the MRCE solve bi-convex problem, which may not lead to the global optimum. Although MRCE is favorable in a way that it learns the output structure, MRCE does not force structured sparsity when learning regression parameters for inputs, which is an important property when dealing with SNPs-gene data.
+
+
+An algorithm that bring together the advantages of the two previous works \cite{kim2010tree} \cite{rothman2010sparse} was introduced by Sohn and coworkers \cite{sohn2012joint}. 
+The proposed algorithm jointly learns regression parameters and output structure with constraint of structure sparsity in inputs, by learning conditional Gaussian graph model.
+Although proposed algorithm resolves the main problems in previous studies, it assumes that input and output are treated as continuous data, which is not true for SNPs-gene data.
+Therefore, it leaves some space for further refinement of the assumptions used in this algorithm.
+
+
+
+
+
+
+
+
+
+In order to solve the problem in more natural way, we can adopt 'mixed graphical models' into our problem.
+Mixed graphical models refer to graphical models that allow for both discrete and continuous variables.
+
+
+Lauritzen first proposed a mixed graphical model for variables of both discrete and continuous \cite{lauritzen1989graphical}.
+ Although this mixed graphical model is carefully designed for general cases, this makes resulting conditional distribution complex. Also, the mean and covariance matrices exist for every possible configurations of states of discrete variables, which results in exponential increase in number of parameters to learn depending on the number of discrete variables.
+
+
+
+
+Later by Jason and coworkers, the mixed graphical model was further developed into more simplified and intuitive version \cite{lee2013structure}. 
+The authors proposed a mixed graphical model that provides intuitive forms of conditional distributions: conditional distribution of a discrete variable reduces to multi-class logistic regression, and that of a continuous variable to Gaussian linear regression. 
+By making assumptions on the general mixed graphical models  \cite{lauritzen1989graphical}, proposed algorithm scales up more efficiently: it has common covariance matrix, and additive mean.
+
+
+To our knowledge, there has not been any study that learns the SNP-gene network as multi-task regression problem using mixed graphical models. 
+In this project, we would like to extend the basic concepts proposed by Sohn  \cite{sohn2012joint} using mixed graph models \cite{lee2013structure}, to solve the problem in more natural way.
+
+
+
+
+
+\section{Dataset}
+We plan to test our method on both synthetic and real dataset. For synthetic dataset, we first will generate gene expression rates and SNPs on randomly selected parameters $\Theta$ varying the sparsity of $\Theta$ and the size of the dataset. For real dataset, we will apply our method to Human Liver Cohort Study data \cite{schadt2008mapping}.%\cite{sohn2012joint}.
+
+\section{Plan of Activities}
+\subsection{Convex Optimization}
+We first need to convert Eq. \ref{eq:obj} into a convex optimization problem, and try to derive a simpler formula to efficiently calculate the log-likelihood and other quantities of interests including the gradient of the conditional log-likelihood and pseudo-likelihood if needed. Then, we will try at least two optimization methods for our problem and analyze the performance on synthetic dataset to find the best performing method.
+
+\subsection{Performance analysis on Real Dataset}
+After finding the best optimization method, we will apply our method to Human Liver Cohort Study data and analyze the performance in both accuracy and computation time in comparison to the methods introduced in the previous research \cite{sohn2012joint}.
+
+
+
+
+
+\nocite{*}
+\bibliographystyle{icml2015}
+\bibliography{midway}
+
+\end{document}
+
+
+% This document was modified from the file originally made available by
+% Pat Langley and Andrea Danyluk for ICML-2K. This version was
+% created by Lise Getoor and Tobias Scheffer, it was slightly modified  
+% from the 2010 version by Thorsten Joachims & Johannes Fuernkranz, 
+% slightly modified from the 2009 version by Kiri Wagstaff and 
+% Sam Roweis's 2008 version, which is slightly modified from 
+% Prasad Tadepalli's 2007 version which is a lightly 
+% changed version of the previous year's version by Andrew Moore, 
+% which was in turn edited from those of Kristian Kersting and 
+% Codrina Lauth. Alex Smola contributed to the algorithmic style files.  
