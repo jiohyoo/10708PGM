@@ -84,12 +84,30 @@ Recent progress on large scale genome-wide studies show that many human common d
 \section{Experiments}
 We compare the performance of our method to lasso, multi-task lasso with $L_1/L_2$ regularization, and sparse CGGM using synthetic dataset and will compare the performances on real dataset for eQTL mapping later.
 
-\subsection{Synthetic Experiments}
+\subsection{Basic Synthetic Experiments}
 We analyze the performance of our method on the synthetic dataset. We created a simple model as a ground truth with 10 discrete variables (input) and 10 continuous variables (output). The discrete variables have two possible binary states, and their node potentials are . 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. We analyze the performance based on the two measure: prediction error (mean squared error of predicted output) and accuracy of edge discovery (true positive and true negative out of total number of edges). To find the optimal hyper-parameters, we use 5-fold cross-validation based on the prediction error for lasso, multi-task lasso, and sparse CGGM, and the likelihood for our method.
 
-Figure X shows the prediction error on test set of all methods.
+\begin{table}
+    \label{table:syn_pred_err}
+    	\caption{Prediction error on synthetic dataset with methods MG (mixed graphical model), SCGGM (sparse CGGM), Lasso, MTLasso (multi-task Lasso).}
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+    Method & Prediction Error \\
+    \hline
+    MG & $0 \pm 0$ \\
+    SCGGM & $1.1420 \pm 0.0398$  \\
+    Lasso & $1.1244 \pm 0.0558$  \\
+    MTLasso & $1.1215 \pm 0.0263$ \\
+    \hline 
+    \end{tabular}
+\end{center}
+\end{table}
+Table \ref{table:syn_pred_err} shows the prediction error on test set of all methods. For the baseline methods, multi-task lasso shows the lowest prediction error, but they all lie in the confidence interval of each other, so all the baseline methods do not show the significant difference in their performance. Our method shows the highest and large prediction error. We interpret this low performance of our method as it is because of the large number of samples (2000) relatively to the number of parameters to learn. Even when the objective function is penalized by the L1 penalty, the optimization algorithm tries to maximize the objective by abandoning the sparsity of the model in the abundance of the training data.
 
 Figure X shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is $> 97\%$ for all number of samples, but our method shows the lower accuracy ($\sim 50\%$) on 250 samples and it grows to $\sim X\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
+
+\subsection{More Synthetic Experiments}
 
 \subsection{Pre-processing SNPs-Gene Expression Data}
 For exploring the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} (\url{https://www.synapse.org/#!Synapse:syn4499}). Out of 427 patients with more than 40,000 and more than 700,000 SNPs in the given data, we first extract 137 samples that contain both information on genotype and expression rates. To  focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is $ > 0.05$ and SNPs on chromosome 6 with minor allele frequency $ > 0.01$ and pair-wise correlation $ < 0.1$ to select genes that are not too biased to have major allele and not too related each other according to dbSNP(\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}). For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables and expression rates are to be continuous variables in our model.
