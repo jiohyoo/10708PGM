@@ -276,7 +276,7 @@ We used PNOPT package \cite{lee2012proximal} for implementation of proximal Netw
 We compare the performance of our method to lasso, multi-task lasso with $L_1/L_2$ regularization, and sparse CGGM using synthetic dataset and will compare the performances on real dataset for eQTL mapping later.
 
 \subsection{Basic Synthetic Experiments}
-We analyze the performance of our method on the synthetic dataset. We created a simple model as a ground truth with 10 discrete variables (input) and 10 continuous variables (output). The discrete variables have two possible binary states, and their node potentials are . 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. We analyze the performance based on the two measure: prediction error (mean squared error of predicted output) and accuracy of edge discovery (true positive and true negative out of total number of edges). To find the optimal hyper-parameters, we use 5-fold cross-validation based on the prediction error for lasso, multi-task lasso, and sparse CGGM, and the likelihood for our method.
+We analyze the performance of our method on the synthetic dataset. We created a simple model as a ground truth with 10 discrete variables (input) and 10 continuous variables (output). The discrete variables have two possible binary states, and their node potentials is $1$ for two consecutive variables and zero otherwise. The continuous variables have $0.25$ potentials for two consecutive variables and zero otherwise. The potential between continuous and discrete variables are $1$ if they have the same index and zero otherwise.  Total 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. We analyze the performance based on the two measure: prediction error (mean squared error of predicted output) and accuracy of edge discovery (true positive and true negative out of total number of edges). To find the optimal hyper-parameters, we use 5-fold cross-validation based on the prediction error for lasso, multi-task lasso, and sparse CGGM, and the likelihood for our method.
 
 \begin{table}
     \label{table:syn_pred_err}
@@ -286,7 +286,7 @@ We analyze the performance of our method on the synthetic dataset. We created a 
     \hline
     Method & Prediction Error \\
     \hline
-    MG & $0 \pm 0$ \\
+    MG & $3.1606 \pm 0.1238$ \\
     SCGGM & $1.1420 \pm 0.0398$  \\
     Lasso & $1.1244 \pm 0.0558$  \\
     MTLasso & $1.1215 \pm 0.0263$ \\
@@ -314,6 +314,7 @@ For exploring the eQTL mapping between SNPs and the expression rates of the rela
 At this point, the pre-processing of this HLC dataset is finished. After more analyses on the performance and the characteristics of our method, we will run our method on this data and report the results along with other baseline methods.
 
 \section{Conclusion}
+In this project, we adopt mixed graphical model for a better generative model in discovering the eQTL mapping in SNPs-gene networks. In synthetic experiments, our model shows lower performance in both prediction error and edge recovery rate than the baseline models due to the true model's simplicity. We will conduct more synthetic experiments on more complex synthetic model and real dataset from HLC study.
 
 
 \begin{appendices}
