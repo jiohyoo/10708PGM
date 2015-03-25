@@ -296,7 +296,14 @@ We analyze the performance of our method on the synthetic dataset. We created a 
 \end{table}
 Table \ref{table:syn_pred_err} shows the prediction error on test set of all methods. For the baseline methods, multi-task lasso shows the lowest prediction error, but they all lie in the confidence interval of each other, so all the baseline methods do not show the significant difference in their performance. Our method shows the highest and large prediction error. We interpret this low performance of our method as it is because of the large number of samples (2000) relatively to the number of parameters to learn. Even when the objective function is penalized by the L1 penalty, the optimization algorithm tries to maximize the objective by abandoning the sparsity of the model in the abundance of the training data.
 
-Figure X shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is $> 97\%$ for all number of samples, but our method shows the lower accuracy ($\sim 50\%$) on 250 samples and it grows to $\sim X\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
+\begin{figure}[hb]
+  \centering
+  \label{fig:syn_edge_rec}
+  \includegraphics[width=3in]{figure/figure1}
+  \caption[] {Edge recovery rate of MG and SCGGM on the synthetic dataset. Edge recovery rate of SCGGM is above $95\%$ for all training sample sizes and greater than that of MG.}
+\end{figure}
+
+Figure \ref{fig:syn_edge_rec} shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is greater than $97\%$ for all number of samples, but our method shows the lower accuracy  around $50\%$ on 250 samples and it grows to $80\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
 
 \subsection{More Synthetic Experiments}
 As we believe the low performance of our model is due to the high simplicity and the small number of dimensions and parameters, we are planing to create a model with more dimensions and complexity and to train the models with less samples. We hope we can get results that our model is robust with relatively small size of the data as well as accurate in both prediction and edge discovery.
@@ -309,17 +316,9 @@ At this point, the pre-processing of this HLC dataset is finished. After more an
 \section{Conclusion}
 
 
-\section{Plan of Activities}
-\subsection{Convex Optimization}
-We first need to convert Eq. \ref{eq:obj} into a convex optimization problem, and try to derive a simpler formula to efficiently calculate the log-likelihood and other quantities of interests including the gradient of the conditional log-likelihood and pseudo-likelihood if needed. Then, we will try at least two optimization methods for our problem and analyze the performance on synthetic dataset to find the best performing method.
-
-\subsection{Performance analysis on Real Dataset}
-After finding the best optimization method, we will apply our method to Human Liver Cohort Study data and analyze the performance in both accuracy and computation time in comparison to the methods introduced in the previous research \cite{sohn2012joint}.
-
 \begin{appendices}
 \section{Plan of Activities}
 \subsection{Old Plan of Activities}
-
 2/16$\sim$: Finish project proposal \\
 2/23$\sim$: Understand and develop the learning algorithm for or model and try a few optimization methods. \\
 3/9$\sim$: Look for real dataset and other methods for the baseline models.\\
