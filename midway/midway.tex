@@ -8,7 +8,12 @@
 \documentclass{article}
 
 % ams packages
-\usepackage{amsfonts, amsmath, amsthm, bm, amssymb}
+\usepackage{amsmath,amsfonts,amssymb}
+
+% use Appendix
+\usepackage{appendix}
+
+\usepackage{multicol}
 
 % use Times
 \usepackage{times}
@@ -74,10 +79,6 @@
 
 \section{Introduction}
 Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, discovering the eQTL mapping between the genetic variations of interest and expression rates of disease-related proteins, rather than relatively simple clinical phenotypes, is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint study of the genetic variants and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop the more efficient and accurate methods for this eQTL mappings discovery. We summarize these studies in \textbf{section \ref{LiteratureReview}}. Our contribution is the adoption of conditional undirected mixed graphical model, which can embed both discrete variables for SNPs and continuous variables for gene expression rates, to learn a more accurate generative model.
-
-
-
-
 
 
 
@@ -271,25 +272,34 @@ We used PNOPT package \cite{lee2012proximal} for implementation of proximal Netw
 
 
 
-
-
-
-
-
-
-
-
-
-
 \section{Experiments}
 We compare the performance of our method to lasso, multi-task lasso with $L_1/L_2$ regularization, and sparse CGGM using synthetic dataset and will compare the performances on real dataset for eQTL mapping later.
 
-\subsection{Synthetic Experiments}
+\subsection{Basic Synthetic Experiments}
 We analyze the performance of our method on the synthetic dataset. We created a simple model as a ground truth with 10 discrete variables (input) and 10 continuous variables (output). The discrete variables have two possible binary states, and their node potentials are . 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. We analyze the performance based on the two measure: prediction error (mean squared error of predicted output) and accuracy of edge discovery (true positive and true negative out of total number of edges). To find the optimal hyper-parameters, we use 5-fold cross-validation based on the prediction error for lasso, multi-task lasso, and sparse CGGM, and the likelihood for our method.
 
-Figure X shows the prediction error on test set of all methods.
+\begin{table}
+    \label{table:syn_pred_err}
+    	\caption{Prediction error on synthetic dataset with methods MG (mixed graphical model), SCGGM (sparse CGGM), Lasso, MTLasso (multi-task Lasso).}
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+    Method & Prediction Error \\
+    \hline
+    MG & $0 \pm 0$ \\
+    SCGGM & $1.1420 \pm 0.0398$  \\
+    Lasso & $1.1244 \pm 0.0558$  \\
+    MTLasso & $1.1215 \pm 0.0263$ \\
+    \hline 
+    \end{tabular}
+\end{center}
+\end{table}
+Table \ref{table:syn_pred_err} shows the prediction error on test set of all methods. For the baseline methods, multi-task lasso shows the lowest prediction error, but they all lie in the confidence interval of each other, so all the baseline methods do not show the significant difference in their performance. Our method shows the highest and large prediction error. We interpret this low performance of our method as it is because of the large number of samples (2000) relatively to the number of parameters to learn. Even when the objective function is penalized by the L1 penalty, the optimization algorithm tries to maximize the objective by abandoning the sparsity of the model in the abundance of the training data.
 
 Figure X shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is $> 97\%$ for all number of samples, but our method shows the lower accuracy ($\sim 50\%$) on 250 samples and it grows to $\sim X\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
+
+\subsection{More Synthetic Experiments}
+As we believe the low performance of our model is due to the high simplicity and the small number of dimensions and parameters, we are planing to create a model with more dimensions and complexity and to train the models with less samples. We hope we can get results that our model is robust with relatively small size of the data as well as accurate in both prediction and edge discovery.
 
 \subsection{Pre-processing SNPs-Gene Expression Data}
 For exploring the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} (\url{https://www.synapse.org/#!Synapse:syn4499}). Out of 427 patients with more than 40,000 and more than 700,000 SNPs in the given data, we first extract 137 samples that contain both information on genotype and expression rates. To  focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is $ > 0.05$ and SNPs on chromosome 6 with minor allele frequency $ > 0.01$ and pair-wise correlation $ < 0.1$ to select genes that are not too biased to have major allele and not too related each other according to dbSNP(\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}). For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables and expression rates are to be continuous variables in our model.
@@ -298,28 +308,38 @@ At this point, the pre-processing of this HLC dataset is finished. After more an
 
 \section{Conclusion}
 
-\subsection{Plan of Activities}
 
-
-
-
-
-
-
-
-\clearpage
-\section*{Appendix}
-
-\section*{Plan of Activities (Proposal)}
-\subsection*{Convex Optimization}
+\section{Plan of Activities}
+\subsection{Convex Optimization}
 We first need to convert Eq. \ref{eq:obj} into a convex optimization problem, and try to derive a simpler formula to efficiently calculate the log-likelihood and other quantities of interests including the gradient of the conditional log-likelihood and pseudo-likelihood if needed. Then, we will try at least two optimization methods for our problem and analyze the performance on synthetic dataset to find the best performing method.
 
-\subsection*{Performance analysis on Real Dataset}
+\subsection{Performance analysis on Real Dataset}
 After finding the best optimization method, we will apply our method to Human Liver Cohort Study data and analyze the performance in both accuracy and computation time in comparison to the methods introduced in the previous research \cite{sohn2012joint}.
 
+\begin{appendices}
+\section{Plan of Activities}
+\subsection{Old Plan of Activities}
 
+2/16$\sim$: Finish project proposal \\
+2/23$\sim$: Understand and develop the learning algorithm for or model and try a few optimization methods. \\
+3/9$\sim$: Look for real dataset and other methods for the baseline models.\\
+3/16$\sim$:  Create synthetic data. \\ 
+3/23$\sim$: Finish synthetic experiments and write midway report \\
+3/30$\sim$: Run algorithm on real dataset and interpret the results. \\
+4/6$\sim$: Improve our method. \\
 
+\subsection{Revised Plan of Activities}
 
+2/16$\sim$: Finish project proposal \\
+2/23$\sim$: Understand and develop the learning algorithm for or model and try a few optimization methods. \\
+3/9$\sim$:  \textbf{Create synthetic data for mixed graphical model}. \\ 
+3/16$\sim$: \textbf{Look for real dataset and pre-process the data for our experiments.}\\
+3/23$\sim$: Finish synthetic experiments and write midway report. \\
+3/30$\sim$: \textbf{Debug our implementation, create more synthetic dataset to confirm the usefulness of our method.} \\
+4/6$\sim$: \textbf{Run our algorithm on HLC dataset and interpret the results.} \\
+4/13$\sim$: \textbf{Run our algorithm on other real dataset, and improve our method.} \\
+
+\end{appendices}
 
 \nocite{*}
 \bibliographystyle{icml2015}
