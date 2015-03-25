@@ -10,6 +10,11 @@
 % ams packages
 \usepackage{amsmath,amsfonts,amssymb}
 
+% use Appendix
+\usepackage{appendix}
+
+\usepackage{multicol}
+
 % use Times
 \usepackage{times}
 % For figures
@@ -108,6 +113,7 @@ Table \ref{table:syn_pred_err} shows the prediction error on test set of all met
 Figure X shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is $> 97\%$ for all number of samples, but our method shows the lower accuracy ($\sim 50\%$) on 250 samples and it grows to $\sim X\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
 
 \subsection{More Synthetic Experiments}
+As we believe the low performance of our model is due to the high simplicity and the small number of dimensions and parameters, we are planing to create a model with more dimensions and complexity and to train the models with less samples. We hope we can get results that our model is robust with relatively small size of the data as well as accurate in both prediction and edge discovery.
 
 \subsection{Pre-processing SNPs-Gene Expression Data}
 For exploring the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} (\url{https://www.synapse.org/#!Synapse:syn4499}). Out of 427 patients with more than 40,000 and more than 700,000 SNPs in the given data, we first extract 137 samples that contain both information on genotype and expression rates. To  focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is $ > 0.05$ and SNPs on chromosome 6 with minor allele frequency $ > 0.01$ and pair-wise correlation $ < 0.1$ to select genes that are not too biased to have major allele and not too related each other according to dbSNP(\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}). For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables and expression rates are to be continuous variables in our model.
@@ -115,8 +121,6 @@ For exploring the eQTL mapping between SNPs and the expression rates of the rela
 At this point, the pre-processing of this HLC dataset is finished. After more analyses on the performance and the characteristics of our method, we will run our method on this data and report the results along with other baseline methods.
 
 \section{Conclusion}
-
-\subsection{Plan of Activities}
 
 
 
@@ -212,9 +216,30 @@ We first need to convert Eq. \ref{eq:obj} into a convex optimization problem, an
 \subsection{Performance analysis on Real Dataset}
 After finding the best optimization method, we will apply our method to Human Liver Cohort Study data and analyze the performance in both accuracy and computation time in comparison to the methods introduced in the previous research \cite{sohn2012joint}.
 
+\begin{appendices}
+\section{Plan of Activities}
+\subsection{Old Plan of Activities}
 
+2/16$\sim$: Finish project proposal \\
+2/23$\sim$: Understand and develop the learning algorithm for or model and try a few optimization methods. \\
+3/9$\sim$: Look for real dataset and other methods for the baseline models.\\
+3/16$\sim$:  Create synthetic data. \\ 
+3/23$\sim$: Finish synthetic experiments and write midway report \\
+3/30$\sim$: Run algorithm on real dataset and interpret the results. \\
+4/6$\sim$: Improve our method. \\
 
+\subsection{Revised Plan of Activities}
 
+2/16$\sim$: Finish project proposal \\
+2/23$\sim$: Understand and develop the learning algorithm for or model and try a few optimization methods. \\
+3/9$\sim$:  \textbf{Create synthetic data for mixed graphical model}. \\ 
+3/16$\sim$: \textbf{Look for real dataset and pre-process the data for our experiments.}\\
+3/23$\sim$: Finish synthetic experiments and write midway report. \\
+3/30$\sim$: \textbf{Debug our implementation, create more synthetic dataset to confirm the usefulness of our method.} \\
+4/6$\sim$: \textbf{Run our algorithm on HLC dataset and interpret the results.} \\
+4/13$\sim$: \textbf{Run our algorithm on other real dataset, and improve our method.} \\
+
+\end{appendices}
 
 \nocite{*}
 \bibliographystyle{icml2015}
