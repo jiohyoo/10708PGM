@@ -73,6 +73,8 @@
 ]
 
 \section{Introduction}
+Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, discovering the eQTL mapping between the genetic variations of interest and expression rates of disease-related proteins, rather than relatively simple clinical phenotypes, is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint study of the genetic variants and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop the more efficient and accurate methods for this eQTL mappings discovery. We summarize these studies in \textbf{section \ref{LiteratureReview}}. Our contribution is the adoption of conditional undirected mixed graphical model, which can embed both discrete variables for SNPs and continuous variables for gene expression rates, to learn a more accurate generative model.
+
 
 \section{Background \& Related Work}
 \label{LiteratureReview}
@@ -87,12 +89,12 @@ We analyze the performance of our method on the synthetic dataset. We created a 
 
 Figure X shows the prediction error on test set of all methods.
 
-Figure X shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is $> 97\%$ for all number of samples, but our method shows the accuracy very low ($\sim 50\%$) on 250 samples and it grows to $\sim X\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
+Figure X shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is $> 97\%$ for all number of samples, but our method shows the lower accuracy ($\sim 50\%$) on 250 samples and it grows to $\sim X\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
 
 \subsection{Pre-processing SNPs-Gene Expression Data}
-For exploring the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} (\url{https://www.synapse.org/#!Synapse:syn4499}). Out of 427 patients with more than 40,000 and more than 700,000 SNPs in the given data, we first extract 137 samples that contain both information on genotype and expression rates. To  focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is $ > 0.05$ and SNPs on chromosome 6 with minor allele frequency $ > 0.01$ and pair-wise correlation $ < 0.1$ to select genes that are not too biased to have major allele and not too related each other according to dbSNP(\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}).
-
-Currently, the pre-processing of this HLC dataset is finished. After more analyses on the performance and the characteristics of our method, we will run our method on this data and report the results along with other baseline methods.
+For exploring the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} (\url{https://www.synapse.org/#!Synapse:syn4499}). Out of 427 patients with more than 40,000 and more than 700,000 SNPs in the given data, we first extract 137 samples that contain both information on genotype and expression rates. To  focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is $ > 0.05$ and SNPs on chromosome 6 with minor allele frequency $ > 0.01$ and pair-wise correlation $ < 0.1$ to select genes that are not too biased to have major allele and not too related each other according to dbSNP(\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}). For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables and expression rates are to be continuous variables in our model.
+ 
+At this point, the pre-processing of this HLC dataset is finished. After more analyses on the performance and the characteristics of our method, we will run our method on this data and report the results along with other baseline methods.
 
 \section{Conclusion}
 
@@ -101,7 +103,6 @@ Currently, the pre-processing of this HLC dataset is finished. After more analys
 
 
 \section{FROM PROPOSAL}
-In molecular biology, it is believed that genetic variations, such as SNPs, change the expression of the corresponding protein, and these effects further propagate through the expression pathway of the other related genes. Multiple regression analysis of a relationship between SNPs and gene expression rates has been conducted to identify the genetic variations in a direct or indirect relationship with gene expressions of interests, or construct a predictor of the diseases based on the given SNPs (summarized in \ref{LiteratureReview}). For our project, we would like to improve the method of learning SNP-gene network by adopting the conditional undirected mixed graphical model in which we can embed both discrete variables for SNPs and continuous variables for gene expression rates.
 
 Following Lee and coworkers \cite{lee2013structure}, the joint distribution of a mixed graphical model with parameters $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\beta_{st}\}]$ can be expressed as:
 
