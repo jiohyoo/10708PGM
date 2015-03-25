@@ -19,6 +19,10 @@ n = data.n
 p = data.p  % number of conti var
 q = data.q  % number of discrete var
 
+
+n_iter = 10;
+performances = zeros(10, 1);
+
 % preprocessing data
 for t = 1:p
     X{t} = zscore(data.Y);                  % normalization
@@ -26,6 +30,8 @@ for t = 1:p
 	Y{t} = data.X(:, t);
 end
 
+
+for iter=1:10
 training_percent = 0.8;
 n_tr = floor(n * training_percent);
 n_te = n - n_tr;
@@ -65,3 +71,5 @@ W = Least_Lasso(X_te, Y_te, best_param, opts);
 % show final performance
 final_performance = eval_mse(Y_te, X_te, W);
 fprintf('Performance on test data: %.4f\n', final_performance);
+performances(iter) = final_performance;
+end

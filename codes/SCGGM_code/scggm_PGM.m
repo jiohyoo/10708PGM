@@ -17,9 +17,14 @@ X = data.Y; % SNPs
 Y = data.X; % expression rate
 n = data.n; % number of samples
 
+n_iter = 10;
+prediction_errors = zeros(10, 1);
+
 % split training / test set 
 training_ratio = 0.8;
 
+
+for iter=1:10
 n_tr = floor(training_ratio * n);
 n_te = n - n_tr;
 
@@ -40,4 +45,8 @@ opt = scggm_cv(X_tr, Y_tr, kcv, lambda1_seq, lambda2_seq, option);
 % compute prediction errors
 [~, e] = scggm_predict(opt.Theta, opt.intercept, X_te, Y_te);
 fprintf('sCGGM demo completed, test set prediction error: %g\n', e); 
+prediction_errors(iter) = e;
+
+end
+prediction_errors
 
