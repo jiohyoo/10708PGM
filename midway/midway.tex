@@ -8,12 +8,7 @@
 \documentclass{article}
 
 % ams packages
-\usepackage{amsmath,amsfonts,amssymb}
-
-% use Appendix
-\usepackage{appendix}
-
-\usepackage{multicol}
+\usepackage{amsfonts, amsmath, amsthm, bm, amssymb}
 
 % use Times
 \usepackage{times}
@@ -81,79 +76,20 @@
 Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, discovering the eQTL mapping between the genetic variations of interest and expression rates of disease-related proteins, rather than relatively simple clinical phenotypes, is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint study of the genetic variants and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop the more efficient and accurate methods for this eQTL mappings discovery. We summarize these studies in \textbf{section \ref{LiteratureReview}}. Our contribution is the adoption of conditional undirected mixed graphical model, which can embed both discrete variables for SNPs and continuous variables for gene expression rates, to learn a more accurate generative model.
 
 
+
+
+
+
+
+
 \section{Background \& Related Work}
 \label{LiteratureReview}
 
-\section{Methods}
-
-\section{Experiments}
-We compare the performance of our method to lasso, multi-task lasso with $L_1/L_2$ regularization, and sparse CGGM using synthetic dataset and will compare the performances on real dataset for eQTL mapping later.
-
-\subsection{Basic Synthetic Experiments}
-We analyze the performance of our method on the synthetic dataset. We created a simple model as a ground truth with 10 discrete variables (input) and 10 continuous variables (output). The discrete variables have two possible binary states, and their node potentials are . 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. We analyze the performance based on the two measure: prediction error (mean squared error of predicted output) and accuracy of edge discovery (true positive and true negative out of total number of edges). To find the optimal hyper-parameters, we use 5-fold cross-validation based on the prediction error for lasso, multi-task lasso, and sparse CGGM, and the likelihood for our method.
-
-\begin{table}
-    \label{table:syn_pred_err}
-    	\caption{Prediction error on synthetic dataset with methods MG (mixed graphical model), SCGGM (sparse CGGM), Lasso, MTLasso (multi-task Lasso).}
-\begin{center}
-    \begin{tabular}{| c | c |}
-    \hline
-    Method & Prediction Error \\
-    \hline
-    MG & $0 \pm 0$ \\
-    SCGGM & $1.1420 \pm 0.0398$  \\
-    Lasso & $1.1244 \pm 0.0558$  \\
-    MTLasso & $1.1215 \pm 0.0263$ \\
-    \hline 
-    \end{tabular}
-\end{center}
-\end{table}
-Table \ref{table:syn_pred_err} shows the prediction error on test set of all methods. For the baseline methods, multi-task lasso shows the lowest prediction error, but they all lie in the confidence interval of each other, so all the baseline methods do not show the significant difference in their performance. Our method shows the highest and large prediction error. We interpret this low performance of our method as it is because of the large number of samples (2000) relatively to the number of parameters to learn. Even when the objective function is penalized by the L1 penalty, the optimization algorithm tries to maximize the objective by abandoning the sparsity of the model in the abundance of the training data.
-
-Figure X shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is $> 97\%$ for all number of samples, but our method shows the lower accuracy ($\sim 50\%$) on 250 samples and it grows to $\sim X\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
-
-\subsection{More Synthetic Experiments}
-As we believe the low performance of our model is due to the high simplicity and the small number of dimensions and parameters, we are planing to create a model with more dimensions and complexity and to train the models with less samples. We hope we can get results that our model is robust with relatively small size of the data as well as accurate in both prediction and edge discovery.
-
-\subsection{Pre-processing SNPs-Gene Expression Data}
-For exploring the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} (\url{https://www.synapse.org/#!Synapse:syn4499}). Out of 427 patients with more than 40,000 and more than 700,000 SNPs in the given data, we first extract 137 samples that contain both information on genotype and expression rates. To  focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is $ > 0.05$ and SNPs on chromosome 6 with minor allele frequency $ > 0.01$ and pair-wise correlation $ < 0.1$ to select genes that are not too biased to have major allele and not too related each other according to dbSNP(\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}). For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables and expression rates are to be continuous variables in our model.
- 
-At this point, the pre-processing of this HLC dataset is finished. After more analyses on the performance and the characteristics of our method, we will run our method on this data and report the results along with other baseline methods.
-
-\section{Conclusion}
 
 
 
-\section{FROM PROPOSAL}
 
-Following Lee and coworkers \cite{lee2013structure}, the joint distribution of a mixed graphical model with parameters $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\beta_{st}\}]$ can be expressed as:
-
-\begin{align}
-p(x, y ; \Theta) \propto \exp \Big( &\sum_{k=1}^{q} \sum_{l=1}^{q} \phi_{kl} (x_k, x_l) \nonumber \\
-+ \sum_{k=1}^{p} \sum_{s=1}^{q} \rho_{ks}(x_k) y_s  &+ \sum_{s=1}^{p} \alpha_s y_s + \sum_{s=1}^{p} \sum_{t=1}^{q} -\frac{1}{2} \beta_{st} y_s y_t \Big)
-\end{align} 
-
-where $x_1, ... x_p$ are discrete variables representing the occurrences for each SNP and $y_1, ..., y_q$ are continuous variables representing the gene expression rate of each gene. As our main focus is on learning the conditional model given observed SNPs, conditional mixed graphical model on SNPs can learn the network more efficiently by avoiding learning the full joint distribution. The conditional distribution is:
-
-\begin{align}
-p(y|x) &= \mathcal{N}(B^{-1}\gamma(x), B^{-1}) \label{eq:cond_prob}\\
-\{\gamma(x)\}_s &= \alpha_s + \sum_{k} \rho_{ks}(x_k) \\
-p(x) &\propto \exp \Big( \sum_{k} \sum_{l} \phi_{kl}(x_k, x_l) + \frac{1}{2} \gamma(x))^\intercal B^{-1} \gamma(x) \Big)
-\end{align}
-
-where $B$ is a symmetric, positive definite inverse covariance matrix $B = \{ \beta_{st}\}$.
-
-The log probability and our objective function are from the property of multivariate Gaussian distribution:
-\begin{align}
-\log p(y | x; \Theta) &= -\frac{1}{2}\log |B^{-1}| -\frac{k}{2} (2 \pi) \nonumber    \\
-& -\frac{1}{2} (y - B^{-1} \gamma(x)^\intercal B (y - B^{-1} \gamma(x)) \\
-l_p(X, Y, \Theta) &= -\frac{1}{2} tr\Big((Y - B^{-1} \Gamma(X))^\intercal B (Y - B^{-1} \Gamma(X)) \Big) \nonumber \\
-& -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\rho_{ks}\}\|_1 \label{eq:obj}
-\end{align}
-
-The parameter $\Theta^*$ that minimizes this L-1 penalized log-likelihood will give us a sparse and consistent estimator, and by comparing the parameters with results in multi-task regression settings, we can analyze the existence of direct and indirect relationship between SNPs and gene expression rates.
-
-\section{Literature Review}
+\subsection{Related Work}
 
 There have been various types of solutions to the problem of learning SNP-gene network. One popular solution is to solve the problem as multi-task regression.
 Given SNP information as inputs, the goal is to find the regression parameters that can map the input to the outputs of gene expressions, which can reveal the structured sparsity in input and output as well.
@@ -206,40 +142,184 @@ In this project, we would like to extend the basic concepts proposed by Sohn  \c
 
 
 
-\section{Dataset}
-We plan to test our method on both synthetic and real dataset. For synthetic dataset, we first will generate gene expression rates and SNPs on randomly selected parameters $\Theta$ varying the sparsity of $\Theta$ and the size of the dataset. For real dataset, we will apply our method to Human Liver Cohort Study data \cite{schadt2008mapping}.%\cite{sohn2012joint}.
 
-\section{Plan of Activities}
-\subsection{Convex Optimization}
+
+\subsection{Background}
+One of the most commonly used method in estimation of SNP-gene network is standard regression method with lasso penalty \cite{tibshirani1996regression}, which solves the following optimization problem.
+
+\begin{align}\label{eq:lasso}
+\text{arg} \min_{\textbf{B}} \text{tr}((\mathbf{Y}-\mathbf{XB})(\mathbf{Y}-\mathbf{XB})^T) + \lambda \| \mathbf{B}\|_1,
+\end{align}
+
+where $\mathbf{X}=(\mathbf{x_1}, ... ,\mathbf{x_N})^T$, $\mathbf{Y}=(\mathbf{y_1}, ... ,\mathbf{y_N})^T$ are input and output data, and $\mathbf{x_i}=(x_{i1}, ... ,x_{iJ})^T \in \mathbb{R}^J$, and $\mathbf{y_i}=(y_{i1}, ... ,y_{iK})^T \in \mathbb{R}^K$.
+The output is estimated by regression: $\mathbf{y_i}=\mathbf{Bx_i}+\mathbf{\varepsilon_i}$, where $\varepsilon  \sim \mathcal{N}(0, \mathbf{\Psi})$.
+By enforcing sparsity in \textbf{B}, it is able to take into account of the problem setting that we have $J >> N$ (SNPs vector is high-dimensional).
+
+To address problem of learning structured sparsity and ouput structure using regression model, Sohn \cite{sohn2012joint} proposed a model that extends the problem of learning standard regression model into learning Gaussian graphical model.
+
+By formulating the joint distribution of inpit and output as \ref{eq:jointG}, where $ \mathbf{\Sigma}^{-1}= \begin{pmatrix}
+    \mathbf{\Theta}_{xx} & \mathbf{\Theta}_{xy}\\
+   \mathbf{\Theta}_{xy}^T &  \mathbf{\Theta}_{yy}  
+\end{pmatrix}$,
+the authors show that it can be interpreted as different parameterization of standard regression model \ref{eq:lasso} by setting $\mathbf{B}=\mathbf{\Sigma}_{xy}^T \mathbf{\Sigma}_{xx}^{-1}=-\mathbf{\Theta}_{yy}^{-1}\mathbf{\Theta}_{xy}^T$, and $\mathbf{\Psi}= \mathbf{\Theta}_{yy}^{-1}$.
+
+
+
+\begin{align}\label{eq:jointG}
+%\[
+\begin{bmatrix}
+    \mathbf{x_i}\\
+    \mathbf{y_i}
+\end{bmatrix}
+ \sim \mathcal{N}
+ \begin{pmatrix}
+\begin{bmatrix}
+    \mathbf{0}_J  \\
+   \mathbf{0}_K
+\end{bmatrix}
+,
+    \Sigma
+\end{pmatrix}
+%\]
+\end{align}
+
+Although the method by Sohn suits the needs for the SNP-gene network estimation by in a way that it learns both structured sparsity, and output structure, and formulates the problem using the standard regression problem, the underlying assumption is that both input and output are continuous variables. 
+
+By raising question of how to estimate SNPs-gene network in more natural way, we turn our attention to more various types of graphical models that can reflect the nature of discrete continuous output variables. 
+
+For continuous variables, multivariate Gaussian model is one of the commonly used graphical model, $y \sim \mathcal{N}(0, \Theta^{-1})$, where the inverse covariance $\Theta$ is estimated via graphical lasso. For discrete variables, pairwise Markov random field $p(x) \propto exp \sum_{r\leq j} \phi_{rj}(x_r, x_j)$ is one of the commonly used graphical model.
+Study on mixed graphical model that combines two commonly used graphical models of Gaussian and pair-wise graphical models so that it can handle data consisting of both continuous and discrete variables have been investigated by authors in \cite{lauritzen1989graphical}, where the conditional distribution was modelled as $p(y|x) = \mathcal{N}(\mu(x), \Sigma(x))$. 
+Despite of the novelty and usages of the mixed graphical model, it has not been used as widely due to its complexity in learning the parameters, and less intuitive interpretation of the distribution when expressed in form of conditional distribution.
+
+The authors in \cite{lee2013structure} have proposed a special case of the mixed graphical model that resolves the problem of parameter learning complexity, and vague form of conditional distribution, by making several assumptions.
+ The detailed explanation follows in section \ref{Methods}.
+ 
+In our work, we plan to investigate the behaviors of mixed graphical model, which meets the assumption on the types of data it can handle for our problem of SNP-gene expression network, which has not been explored previously. We plan to compare the performance of mixed graphical model when applied to SNP-gene network estimation problem, with that of the method induced by commonly used method.
+
+
+
+
+\section{Methods}
+\label{Methods}
+For our project, we would like to improve the method of learning SNP-gene network by adopting the conditional undirected mixed graphical model in which we can embed both discrete variables for SNPs and continuous variables for gene expression rates.
+
+\subsection{Baseline Method}
+Lee and coworkers \cite{lee2013structure} proposed a mixed graphical model of discrete and continuous variables, where the joint distribution is expressed as:
+
+\begin{align}
+p(x, y ; \Theta) \propto \exp \Big( &\sum_{k=1}^{q} \sum_{l=1}^{q} \phi_{kl} (x_k, x_l) \nonumber \\
++ \sum_{k=1}^{p} \sum_{s=1}^{q} \rho_{ks}(x_k) y_s  &+ \sum_{s=1}^{p} \alpha_s y_s + \sum_{s=1}^{p} \sum_{t=1}^{q} -\frac{1}{2} \beta_{st} y_s y_t \Big) \label{eq:joint}
+\end{align} 
+
+where $x_1, ... x_p$ are discrete variables representing the occurrences for each SNP and $y_1, ..., y_q$ are continuous variables representing the gene expression rate of each gene. 
+The parameters are $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\beta_{st}\}]$, where $\phi_{kl}$, $\rho_{k}$, $\alpha_{s}$, $\beta_{st}$ are the discrete-discrete edge potential, continuous-discrete edge potential, continuous node potential, and continuous-continuous edge potential, respectively.
+
+By making furter assumptions on mixed graphical models originally introduced in \cite{lauritzen1989graphical}, the mixed graphical model \ref{eq:joint} proposed by Lee yields intuitve results when reformulated into various froms of distributions. The conditional distribution of continuous variables and discrete variables given the rest reduces to Guassian linear regression, and multiclass logistic regression, respectively. Furthermore, when the data consists of continuous and discrete variables only, the model reduces to multivariate Gaussian model, and pairwise discrete Markov random field, respectively. 
+
+\subsection{Revised Method}
+We are interested in learning the SNP-gene network structure, and learning the conditional distribution of continuous gene expression output data, given observed SNPs.
+Therefore, we only need to focus on learning the conditional distribution of the network rather than learning the full joint distribution. 
+
+The conditional distribution of continous variables given discrete variables of the mixed graphical model in \cite{lee2013structure} reduces to the form of multivariate Gaussian distribution.
+
+\begin{align}
+p(y|x) &= \mathcal{N}(B^{-1}\gamma(x), B^{-1}) \label{eq:cond_prob}\\
+\{\gamma(x)\}_s &= \alpha_s + \sum_{k} \rho_{ks}(x_k) \\
+p(x) &\propto \exp \Big( \sum_{k} \sum_{l} \phi_{kl}(x_k, x_l) + \frac{1}{2} \gamma(x))^\intercal B^{-1} \gamma(x) \Big)
+\end{align}
+
+where $B$ is a symmetric, positive definite inverse covariance matrix $B = \{ \beta_{st}\}$ that is shared across the Gaussian distributions. 
+
+From the property of multivariate Gaussian distribution, the log likelihood of the parameters $\Theta$ given discrete variables $y$ can be expressed as:
+\begin{align}
+\log p(y | x; \Theta) &= -\frac{1}{2}\log |B^{-1}| -\frac{k}{2} (2 \pi) \nonumber    \\
+& -\frac{1}{2} (y - B^{-1} \gamma(x)^\intercal B (y - B^{-1} \gamma(x)) \label{eq:loglikli} \\ 
+l_p(\Theta|y) &= -\frac{1}{2} tr\Big((Y - B^{-1} \Gamma(X))^\intercal B (Y - B^{-1} \Gamma(X)) \Big) \nonumber \\
+& -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\rho_{ks}\}\|_1 \label{eq:obj}
+\end{align}
+
+The parameter $\Theta^*$ that minimizes this L-1 penalized log-likelihood will give us a sparse and consistent estimator, and by comparing the parameters with results in multi-task regression settings, we can analyze the existence of direct and indirect relationship between SNPs and gene expression rates.
+
+For the parameter estimation, we minimize the negative log-likelihood expressed in product of each variable given the rest as follows:
+\begin{align}
+\tilde{l}(\Theta |y) = - \sum_{s=1}^{p} \log p(y_s |y_{\setminus s}, x;\Theta),
+\end{align}
+where from \ref{eq:joint}, $p(y_s |y_{\setminus s}, x;\Theta)$ can be reformulated as follows:
+\begin{align}
+&p(y_s |y_{\setminus s}, x;\Theta) =\nonumber    \\
+& \frac{\sqrt{\beta_{ss}}}{\sqrt{2\pi}} \exp \left(\frac{-\beta_{ss}}{2} \left(y_s - \frac{\alpha_s + \sum_j \rho_{sj}(y_j)-\sum_{t=s}\beta_{st}y_t }{\beta_{ss}}\right) \right)^2
+\end{align}
+
+
+
+
+\subsection{Optimization}
+For the optimization, proximal Newton method \cite{schmidt2010graphical,schmidt2011projected} is used. Proximal Netwon optimization method breaks down the optimization problem into $f(x) + g(x)$, where $f(x)$ is smooth and convex function, and $g(x)$ is a convex function. 
+In our problem, functions $f(x)$ and $g(x)$ correspond to the negative loglikihood and sparsity constraint, respectively.
+
+Proximal Netwon method is an extension of proximal gradient method that considers the second order information of $f(x)$ instead of the first order.
+The proximal gradient seeks next point by computing $x_{k+1} = prox_t (x_k - t \bigtriangledown(x_k))$, where $prox_t(x)=\text{argmin}_u(\frac{1}{2t}{\|x-u\|}^2 + g(u))$, and $t$ is chosen by Armijo line search algorithm. In proximal Netwon method, $Hprox$ is used, where the $prox$ operator is extended to $\| \cdot \|_H$, where $H=\bigtriangledown^2 f(x_k)$. For each iteration, proximal Netwon method finds the next point that minimizes below function.
+\begin{align}
+  &\bigtriangledown f(x_k)^T(u-x_k)+\frac{1}{2t}(u+x_k)^TH(u-w_k)+g(u) \nonumber    \\
+ & =  Hprox_t(x_k-tH^{-1}\bigtriangledown f(x_k)).
+\end{align}
+
+Previous studies on proximal Newton method \cite{lee2012proximal} shows that it converges faster especially when $n$ is large, with better performance compared to the proximal gradient method.
+
+For the implementation, $H$ is approximated using BFGS.
+We used PNOPT package \cite{lee2012proximal} for implementation of proximal Netwon optimization algorithm.
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Experiments}
+We compare the performance of our method to lasso, multi-task lasso with $L_1/L_2$ regularization, and sparse CGGM using synthetic dataset and will compare the performances on real dataset for eQTL mapping later.
+
+\subsection{Synthetic Experiments}
+We analyze the performance of our method on the synthetic dataset. We created a simple model as a ground truth with 10 discrete variables (input) and 10 continuous variables (output). The discrete variables have two possible binary states, and their node potentials are . 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. We analyze the performance based on the two measure: prediction error (mean squared error of predicted output) and accuracy of edge discovery (true positive and true negative out of total number of edges). To find the optimal hyper-parameters, we use 5-fold cross-validation based on the prediction error for lasso, multi-task lasso, and sparse CGGM, and the likelihood for our method.
+
+Figure X shows the prediction error on test set of all methods.
+
+Figure X shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is $> 97\%$ for all number of samples, but our method shows the lower accuracy ($\sim 50\%$) on 250 samples and it grows to $\sim X\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
+
+\subsection{Pre-processing SNPs-Gene Expression Data}
+For exploring the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} (\url{https://www.synapse.org/#!Synapse:syn4499}). Out of 427 patients with more than 40,000 and more than 700,000 SNPs in the given data, we first extract 137 samples that contain both information on genotype and expression rates. To  focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is $ > 0.05$ and SNPs on chromosome 6 with minor allele frequency $ > 0.01$ and pair-wise correlation $ < 0.1$ to select genes that are not too biased to have major allele and not too related each other according to dbSNP(\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}). For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables and expression rates are to be continuous variables in our model.
+ 
+At this point, the pre-processing of this HLC dataset is finished. After more analyses on the performance and the characteristics of our method, we will run our method on this data and report the results along with other baseline methods.
+
+\section{Conclusion}
+
+\subsection{Plan of Activities}
+
+
+
+
+
+
+
+
+\clearpage
+\section*{Appendix}
+
+\section*{Plan of Activities (Proposal)}
+\subsection*{Convex Optimization}
 We first need to convert Eq. \ref{eq:obj} into a convex optimization problem, and try to derive a simpler formula to efficiently calculate the log-likelihood and other quantities of interests including the gradient of the conditional log-likelihood and pseudo-likelihood if needed. Then, we will try at least two optimization methods for our problem and analyze the performance on synthetic dataset to find the best performing method.
 
-\subsection{Performance analysis on Real Dataset}
+\subsection*{Performance analysis on Real Dataset}
 After finding the best optimization method, we will apply our method to Human Liver Cohort Study data and analyze the performance in both accuracy and computation time in comparison to the methods introduced in the previous research \cite{sohn2012joint}.
 
-\begin{appendices}
-\section{Plan of Activities}
-\subsection{Old Plan of Activities}
 
-2/16$\sim$: Finish project proposal \\
-2/23$\sim$: Understand and develop the learning algorithm for or model and try a few optimization methods. \\
-3/9$\sim$: Look for real dataset and other methods for the baseline models.\\
-3/16$\sim$:  Create synthetic data. \\ 
-3/23$\sim$: Finish synthetic experiments and write midway report \\
-3/30$\sim$: Run algorithm on real dataset and interpret the results. \\
-4/6$\sim$: Improve our method. \\
 
-\subsection{Revised Plan of Activities}
 
-2/16$\sim$: Finish project proposal \\
-2/23$\sim$: Understand and develop the learning algorithm for or model and try a few optimization methods. \\
-3/9$\sim$:  \textbf{Create synthetic data for mixed graphical model}. \\ 
-3/16$\sim$: \textbf{Look for real dataset and pre-process the data for our experiments.}\\
-3/23$\sim$: Finish synthetic experiments and write midway report. \\
-3/30$\sim$: \textbf{Debug our implementation, create more synthetic dataset to confirm the usefulness of our method.} \\
-4/6$\sim$: \textbf{Run our algorithm on HLC dataset and interpret the results.} \\
-4/13$\sim$: \textbf{Run our algorithm on other real dataset, and improve our method.} \\
-
-\end{appendices}
 
 \nocite{*}
 \bibliographystyle{icml2015}
