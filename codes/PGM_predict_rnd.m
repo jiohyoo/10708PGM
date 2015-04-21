@@ -1,4 +1,4 @@
-function [prederr] = PGM_predict(theta, alpha1, beta, betad, Y, D)
+function [prederr] = PGM_predict_rnd(theta, alpha1, beta, betad, Y, D)
 
 n = size(Y,1);
 Dtheta = D * theta;
@@ -13,7 +13,13 @@ for i = 1: 10
     end
 end
 
-% Y_hat_all = inv(B44) * (gamma');
-Y_hat_all = (B44) \ (gamma');
-res = Y - Y_hat_all';
+mu = inv(B44) * (gamma');
+sigma = inv(B44);
+
+for i = 1: size(mu,2)
+    r(:,i) = mvnrnd(mu(:,i), sigma);
+end
+
+Y_hat_all = r';
+res = Y - Y_hat_all;
 prederr = sum(sum(res.^2)) / size(Y,2) / n;
