@@ -84,7 +84,7 @@ rep = 1;
     % % %     fprintf('PGM_model (joint) - lambda: %g\n, prediction error: %g\n', opt_ori.lambda, prederr_ori(rep));
     for opt_alg_idx = 1: size(opt_algs,2)
         fprintf('---------------------------------------\n');
-        [prederr(opt_alg_idx, rep)] = PGM_predict(opt{opt_alg_idx}.theta, opt{opt_alg_idx}.alpha1, opt{opt_alg_idx}.beta, opt{opt_alg_idx}.betad, Data.Y_te, Data.D_te);
+        [prederr(opt_alg_idx, rep)] = PGM_predict(opt{opt_alg_idx}.theta, opt{opt_alg_idx}.alpha1, opt{opt_alg_idx}.beta, opt{opt_alg_idx}.betad, Data.X_te, Data.D_te);
 %         fprintf('PGM_model (conditional) - lambda: %g\n, prediction error: %g\n', opt{opt_alg_idx}.lambda, prederr(opt_alg_idx,rep));
     end
 % end

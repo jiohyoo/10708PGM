@@ -26,7 +26,7 @@ D_tr = D;
 
 % n_interval = 250;
 % n_step = 1;%ToyData.n / n_interval;
-n_rep = 1;
+n_rep = 5;
 
 
 
@@ -114,7 +114,7 @@ end
 
 
 
-% save ResOut_0420_2
+save ResOut_0421
 
 
 
