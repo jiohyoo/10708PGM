@@ -33,7 +33,8 @@ x = paramToVecv5_PGM(beta, betad, theta, alpha1, L, n_tr, p, q);
 %% Data split for 5-fold CV
 n_opt_algs = size(opt_algs,2);
 cv_indices = crossvalind('Kfold', n_tr, kcv);
-cverr = zeros(length(lambda_seq), n_opt_algs );
+cverr = zeros(length(lambda_seq), kcv ,n_opt_algs );
+cverr2 = zeros(length(lambda_seq), n_opt_algs );
 minerr = 1e99 * ones(1, n_opt_algs);
 
 
@@ -86,7 +87,7 @@ for opt_alg_idx = 1: n_opt_algs
             end
             
             %% eval lambda
-            cverr(lam_idx, opt_alg_idx) = PGM_predict(theta, alpha1, beta, betad, X_te_CV, D_te_CV);
+            cverr(lam_idx, cv_idx, opt_alg_idx) = PGM_predict(theta, alpha1, beta, betad, X_te_CV, D_te_CV);
             %         prederr_tmp = out.f(end);
             %         %         fprintf('PGM_model - lambda: %g\n, prediction error: %g\n', lam, prederr_tmp);
             
@@ -96,11 +97,11 @@ for opt_alg_idx = 1: n_opt_algs
             
         end
         
-        
-        cverr(lam_idx, :) = cverr(lam_idx, :) / kcv;
+        cverr2(lam_idx, opt_alg_idx) = sum(cverr(lam_idx, :, opt_alg_idx)) / kcv;
+%         cverr(lam_idx, :) = cverr(lam_idx, :) / kcv;
         %     for opt_alg_idx = 1: n_opt_algs
-        if cverr(lam_idx, opt_alg_idx) < minerr(opt_alg_idx)
-            minerr(opt_alg_idx) = cverr(lam_idx, opt_alg_idx);
+        if cverr2(lam_idx, opt_alg_idx) < minerr(opt_alg_idx)
+            minerr(opt_alg_idx) = cverr2(lam_idx, opt_alg_idx);
             opt_lambda = lam;
         end
         %     end
@@ -148,6 +149,10 @@ opt{opt_alg_idx}.theta = theta;
 opt{opt_alg_idx}.alpha1 = alpha1;
 opt{opt_alg_idx}.lambda = opt_lambda;
 opt{opt_alg_idx}.out = out;
+
+opt{opt_alg_idx}.cverr = cverr;
+opt{opt_alg_idx}.cverr2 = cverr2;
+opt{opt_alg_idx}.minerr = minerr;
 
 end %%%%%%%%%%%%%
 % [prederr_fin, opt_lambda_idx] = min(prederr_all);
