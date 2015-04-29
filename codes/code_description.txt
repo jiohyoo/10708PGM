@@ -1,7 +1,0 @@
-syntheticExp2_PGM_CV_0408_opts.m : ours using several optimization methods.
-syntheticExp2_PGM_CV_0408.m : compares conditional model (ours) vs. joint model (original).
-pred_err_test.m : compares result between conditional and joint model
-syntheticExp2_PGM_CV_0325.m : old version. ignore...
-PGM_v0420: run algo over HLC data
-
-HLC_data.m : process HLC data into mat format. (convert X val to 3-state-format {0,1,2})
