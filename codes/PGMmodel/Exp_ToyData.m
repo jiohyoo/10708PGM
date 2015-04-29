@@ -24,9 +24,6 @@ Y_tr = Y;
 D_tr = D;
 
 
-n_rep = 5;
-
-
 
 %% para setting
 lam_given = 5 * sqrt(log(ToyData.p + ToyData.q) / n);
@@ -39,7 +36,7 @@ else
 end
 
 kcv = 5; % k-fold CV
-
+n_rep = 5;
 
 
 %% select optimization algorithms to run
@@ -54,7 +51,7 @@ opt_algs = {'AT', 'GRA','LLM','N07','N83','TS','PNOPT'};
 for rep = 1: n_rep
     disp(num2str(rep));
     
-    [TRAIN, TEST] = crossvalind('LeaveMOut', n ,400);
+    [TRAIN, TEST] = crossvalind('LeaveMOut', n , n/kcv);
     X_tr_CV = X_tr(find(TRAIN), :);
     D_tr_CV = D_tr(find(TRAIN), :);
     Y_tr_CV = Y_tr(find(TRAIN),:);
@@ -69,7 +66,7 @@ for rep = 1: n_rep
     ToyData.Y_te = Y_te_CV;
     ToyData.D_te = D_te_CV;
     
-    ToyData.n_tr = 1600;
+    ToyData.n_tr = n - n / kcv;
     
     
     

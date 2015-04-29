@@ -26,7 +26,7 @@ alpha1 = zeros(p,1); % cts node potential param
 % alpha2=zeros(Ltot,1); % dis node potential param
 % phi=zeros(Ltot,Ltot); % dis edge potential params
 Lsum = [0; cumsum(L)];
-x = paramToVecv5_PGM(beta, betad, theta, alpha1, L, n_tr, p, q);
+x = paramToVecv5_PGM(beta, betad, theta, alpha1, L, p);
 
 
 
@@ -36,7 +36,7 @@ cv_indices = crossvalind('Kfold', n_tr, kcv);
 cverr = zeros(length(lambda_seq), kcv ,n_opt_algs );
 cverr2 = zeros(length(lambda_seq), n_opt_algs );
 minerr = 1e99 * ones(1, n_opt_algs);
-
+testerr = [];
 
 
 %% define settings for optimizaiton algs
@@ -64,20 +64,20 @@ for opt_alg_idx = 1: n_opt_algs
             D_te_CV  = D_tr(cv_indices == cv_idx, :);
             
             n_tr_CV = size(X_tr_CV,1);
-            x = paramToVecv5_PGM(beta, betad, theta, alpha1, L, n_tr_CV, p, q);
+            
             
             if strcmp(opt_algs{opt_alg_idx}, 'PNOPT')
                 smoothF = @(x)lhoodTfocsv5_PGM(x, D_tr_CV, X_tr_CV, L, n_tr_CV, p, q);
                 nonsmoothH = @(varargin)tfocsProxGroupv6_PGM(lam, L, n_tr_CV, p, q, varargin{:} ); % only returns value of nonsmooth
                 [ xopt, out, opts ] = pnopt(smoothF, nonsmoothH, x);
                 [beta, betad, theta, alpha1] = vecToParamv5_PGM(xopt, L, n_tr_CV, p, q);
-                prederr_tmp = out;
+                
             else
                 smoothF = @(x)lhoodTfocsv5_PGM(x, D_tr_CV, X_tr_CV, L, n_tr_CV, p, q);
                 nonsmoothH = @(varargin)tfocsProxGroupv6_PGM(lam, L, n_tr_CV, p, q, varargin{:} ); % only returns value of nonsmooth
-                [xopt out opts]=tfocs(smoothF, {}, nonsmoothH, x,opts);
+                [xopt, out, opts]=tfocs(smoothF, {}, nonsmoothH, x,opts);
                 [beta, betad, theta, alpha1] = vecToParamv5_PGM(xopt, L, n_tr_CV, p, q);
-                prederr_tmp = out.f(end);
+                
             end
             
             %% eval lambda
@@ -116,9 +116,8 @@ for opt_alg_idx = 1: n_opt_algs
         [beta, betad, theta, alpha1] = vecToParamv5_PGM(xopt, L, n_tr, p, q);
         
     end
-    testerr = PGM_predict(theta, alpha1, beta, betad, X_te, D_te);
-    disp(['Test err : ' num2str(testerr)]);
     
+
     %% out
     opt{opt_alg_idx}.beta = beta;
     opt{opt_alg_idx}.betad = betad;
@@ -130,6 +129,5 @@ for opt_alg_idx = 1: n_opt_algs
     opt{opt_alg_idx}.cverr = cverr(:, :, opt_alg_idx);
     opt{opt_alg_idx}.cverr2 = cverr2(:, opt_alg_idx);
     opt{opt_alg_idx}.minerr = minerr;
-    opt{opt_alg_idx}.testerr = testerr;
     
 end

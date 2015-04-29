@@ -36,3 +36,9 @@ opt_algs = {'PNOPT'};
 %% run!
 opt = TrainPGM(Data, lambda_seq, kcv, opt_algs);
 
+
+for i = 1 : length(opt_algs)
+    testerr(i) = PGM_predict(opt{i}.theta, opt{i}.alpha1, opt{i}.beta, opt{i}.betad, Data.X_te, Data.D_te);
+    disp(['Test err : ' num2str(testerr(i))]);
+end
+

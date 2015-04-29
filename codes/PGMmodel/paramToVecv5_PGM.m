@@ -1,4 +1,4 @@
-function x=paramToVecv5_PGM(beta,betad,theta,alpha1,L,n,p,q)
+function x=paramToVecv5_PGM(beta,betad,theta,alpha1,L,p)
 Ltot=sum(L);
 sizes=[p^2 p p*Ltot p];
 sums=cumsum(sizes); 

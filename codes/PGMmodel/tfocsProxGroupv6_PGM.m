@@ -42,7 +42,7 @@ if nargin>6 % do the shrinkage , else just return the val at x
     %%
 %     vz=lam*(phinorms+thetanorms+betanorms);
     vz=lam*(thetanorms+betanorms);
-    z=paramToVecv5_PGM(beta,betad,theta,alpha1,L,n,p,q);    
+    z=paramToVecv5_PGM(beta,betad,theta,alpha1,L,p);    
 else    
     %% evaluate group sparsity
     vz=0;
@@ -69,7 +69,7 @@ else
     %%
 %     vz=lam*(phinorms+thetanorms+betanorms);
     vz=lam*(thetanorms+betanorms);
-    z=paramToVecv5_PGM(beta,betad,theta,alpha1,L,n,p,q);       
+    z=paramToVecv5_PGM(beta,betad,theta,alpha1,L,p);       
 end
 
 
