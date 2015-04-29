@@ -9,7 +9,7 @@ addpath(genpath('./TFOCS-1.3.1'));
 addpath(genpath('./pnopt-0.9-rc'));
 
 
-%%
+%% Data
 load('./../Data/ToyData.mat', 'X', 'Y', 'D', 'p', 'q', 'L', 'n', 'thcts', 'maskDisCts', 'maskDis');
 ToyData.p = p;
 ToyData.q = q;
@@ -23,9 +23,7 @@ X_tr = X;
 Y_tr = Y;
 D_tr = D;
 
-
-
-%% para setting
+%% Parameter - lambda
 lam_given = 5 * sqrt(log(ToyData.p + ToyData.q) / n);
 use_given_lam = 0;
 
@@ -38,59 +36,51 @@ end
 kcv = 5; % k-fold CV
 n_rep = 5;
 
-
-%% select optimization algorithms to run
+%% Optimization method
 opt_algs = {'AT', 'GRA','LLM','N07','N83','TS','PNOPT'};
 %  opt_algs = {'PNOPT'};
 
+%% run
+for alg_idx = 1: length(opt_algs)
+    alg = opt_algs{alg_idx};
 
-
-
-
-%%
-for rep = 1: n_rep
-    disp(num2str(rep));
-    
-    [TRAIN, TEST] = crossvalind('LeaveMOut', n , n/kcv);
-    X_tr_CV = X_tr(find(TRAIN), :);
-    D_tr_CV = D_tr(find(TRAIN), :);
-    Y_tr_CV = Y_tr(find(TRAIN),:);
-    X_te_CV  = X_tr(find(TEST), :);
-    Y_te_CV  = Y_tr(find(TEST), :);
-    D_te_CV  = D_tr(find(TEST), :);
-    
-    ToyData.X_tr = X_tr_CV;
-    ToyData.Y_tr = Y_tr_CV;
-    ToyData.D_tr = D_tr_CV;
-    ToyData.X_te = X_te_CV;
-    ToyData.Y_te = Y_te_CV;
-    ToyData.D_te = D_te_CV;
-    
-    ToyData.n_tr = n - n / kcv;
-    
-    
-    
-    %% run!
-    opt = TrainPGM(ToyData, lambda_seq, kcv, opt_algs);
-    
-    for opt_alg_idx = 1: size(opt_algs,2)
+    for rep = 1: n_rep
+        disp(num2str(rep));
+        
+        [TRAIN, TEST] = crossvalind('LeaveMOut', n , n/kcv);
+        X_tr_CV = X_tr(find(TRAIN), :);
+        D_tr_CV = D_tr(find(TRAIN), :);
+        Y_tr_CV = Y_tr(find(TRAIN),:);
+        X_te_CV  = X_tr(find(TEST), :);
+        Y_te_CV  = Y_tr(find(TEST), :);
+        D_te_CV  = D_tr(find(TEST), :);
+        
+        ToyData.X_tr = X_tr_CV;
+        ToyData.Y_tr = Y_tr_CV;
+        ToyData.D_tr = D_tr_CV;
+        ToyData.X_te = X_te_CV;
+        ToyData.Y_te = Y_te_CV;
+        ToyData.D_te = D_te_CV;
+        
+        ToyData.n_tr = n - n / kcv;
+        
+ 
+        % serach for opt lambda
+        opt_para = ParaOpt(ToyData, lambda_seq, kcv, alg);
+        opt_lambda = opt_para.lamdba;
+        
+        % train the model
+        opt = TrainPGM(ToyData, alg, opt_lambda);
+        
+        % test the model
         fprintf('---------------------------------------\n');
-        [prederr(opt_alg_idx, rep)] = PGM_predict(opt{opt_alg_idx}.theta, opt{opt_alg_idx}.alpha1, opt{opt_alg_idx}.beta, opt{opt_alg_idx}.betad, ToyData.X_te, ToyData.D_te);
+        testerr(alg_idx, rep) = PGM_predict(opt.theta, opt.alpha1, opt.beta, opt.betad, ToyData.X_te, ToyData.D_te);
+        dalg_idxsp(['Alg-' alg ' # rep-' num2str(rep) ' - Test err : ' num2str(testerr(alg_idx, rep))]);
     end
-end
-
-
-
-prederr_opt_alg = mean(prederr,2);
-for opt_alg_idx = 1: size(opt_algs,2)
-    fprintf('Opt %s (conditional) - lambda: %g\n: prediction error: %g\n', opt_algs{opt_alg_idx}, opt{opt_alg_idx}.lambda, prederr_opt_alg(opt_alg_idx));
     
-    if strcmp(opt_algs{opt_alg_idx}, 'PNOPT')
-        obj_val(opt_alg_idx) = opt{opt_alg_idx}.out;
-    else
-        obj_val(opt_alg_idx) = opt{opt_alg_idx}.out.f(end);
-    end
+    
 end
+
 
 
 

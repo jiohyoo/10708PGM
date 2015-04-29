@@ -9,12 +9,12 @@ addpath(genpath('./TFOCS-1.3.1'));
 addpath(genpath('./pnopt-0.9-rc'));
 
 rng(0);
-%%
+%% Data
 load('./../Data/HLC_data.mat');% Xtrain Ytrain Xtest Ytest
 [Data] = data_struct(Xtrain, Ytrain, Xtest, Ytest);
 
 
-%% para setting
+%% Parameter - lambda
 lam_given = 5 * sqrt(log(Data.p + Data.q) / Data.n);
 use_given_lam = 0;
 
@@ -28,17 +28,26 @@ end
 kcv = 5; % k-fold CV
 
 
-%% select optimization algorithms to run
+%% Optimization method
 % opt_algs = {'AT', 'GRA','LLM','N07','N83','TS','PNOPT'};
 opt_algs = {'PNOPT'};
 
 
 %% run!
-opt = TrainPGM(Data, lambda_seq, kcv, opt_algs);
-
-
-for i = 1 : length(opt_algs)
-    testerr(i) = PGM_predict(opt{i}.theta, opt{i}.alpha1, opt{i}.beta, opt{i}.betad, Data.X_te, Data.D_te);
-    disp(['Test err : ' num2str(testerr(i))]);
+for alg_idx = 1: length(opt_algs)
+    alg = opt_algs{alg_idx};
+    
+    % serach for opt lambda
+    opt_para{alg_idx} = ParaOpt(Data, lambda_seq, kcv, alg);  
+    opt_lambda = opt_para{alg_idx}.lamdba;
+    
+    % train the model
+    opt{alg_idx} = TrainPGM(Data, alg, opt_lambda);
+    
+    % test the model
+    testerr(alg_idx) = PGM_predict(opt{alg_idx}.theta, opt{alg_idx}.alpha1, opt{alg_idx}.beta, opt{alg_idx}.betad, Data.X_te, Data.D_te);
+    dalg_idxsp(['Test err : ' num2str(testerr(alg_idx))]);
 end
+
+
 
