@@ -15,8 +15,19 @@ n_tr = ToyData.n_tr;
 e = ones(n_tr,1);
 Ltot = sum(L);
 
-
+%% Opt alg
 opts.alg = alg;
+
+
+%% Init opt variables
+theta = zeros(Ltot,p); % cts-dis params
+beta = zeros(p,p); % negative of the precision matrix
+betad = ones(p,1); % diagonal of the precision matrix
+alpha1 = zeros(p,1); % cts node potential param
+% alpha2=zeros(Ltot,1); % dis node potential param
+% phi=zeros(Ltot,Ltot); % dis edge potential params
+Lsum = [0; cumsum(L)];
+x = paramToVecv5_PGM(beta, betad, theta, alpha1, L, p);
 
 
 %% for optimal lambda, train over whole train data set

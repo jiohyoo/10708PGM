@@ -13,7 +13,6 @@ rng(0);
 load('./../Data/HLC_data.mat');% Xtrain Ytrain Xtest Ytest
 [Data] = data_struct(Xtrain, Ytrain, Xtest, Ytest);
 
-
 %% Parameter - lambda
 lam_given = 5 * sqrt(log(Data.p + Data.q) / Data.n);
 use_given_lam = 0;
@@ -25,13 +24,12 @@ else
     %     lambda_seq = 1;
 end
 
+%% CV
 kcv = 5; % k-fold CV
-
 
 %% Optimization method
 % opt_algs = {'AT', 'GRA','LLM','N07','N83','TS','PNOPT'};
 opt_algs = {'PNOPT'};
-
 
 %% run!
 for alg_idx = 1: length(opt_algs)
@@ -39,14 +37,14 @@ for alg_idx = 1: length(opt_algs)
     
     % serach for opt lambda
     opt_para{alg_idx} = ParaOpt(Data, lambda_seq, kcv, alg);  
-    opt_lambda = opt_para{alg_idx}.lamdba;
+    opt_lambda = opt_para{alg_idx}.lambda;
     
     % train the model
     opt{alg_idx} = TrainPGM(Data, alg, opt_lambda);
     
     % test the model
     testerr(alg_idx) = PGM_predict(opt{alg_idx}.theta, opt{alg_idx}.alpha1, opt{alg_idx}.beta, opt{alg_idx}.betad, Data.X_te, Data.D_te);
-    dalg_idxsp(['Test err : ' num2str(testerr(alg_idx))]);
+    disp(['Test err : ' num2str(testerr(alg_idx))]);
 end
 
 

@@ -9,7 +9,7 @@ addpath(genpath('./TFOCS-1.3.1'));
 addpath(genpath('./pnopt-0.9-rc'));
 
 
-%%
+%% Data
 load('./../Data/ToyData.mat', 'X', 'Y', 'D', 'p', 'q', 'L', 'n', 'thcts', 'maskDisCts', 'maskDis');
 ToyData.p = p;
 ToyData.q = q;
@@ -26,37 +26,33 @@ ToyData.Y_te = [];
 ToyData.D_te = [];
 
 
-
+%%
 n_interval = 250;
 n_step = ToyData.n / n_interval;
 n_rep = 10;
 
-
 kcv = 5; % k-fold CV
 
-
-
-%% select optimization algorithms to run
+%% Optimization method
 % opt_algs = {'AT', 'GRA','LLM','N07','N83','TS','PNOPT'};
 opt_algs = {'PNOPT'};
+alg = opt_algs{1};
 
-
-%%
+%% run!
 for ii = 1: n_step
     
     n_sample = n_interval * ii;
     ToyData.n_tr = n_sample;
     
     for rep = 1: n_rep
-        disp(num2str(rep));
-        
+        disp(num2str(rep)); 
         
         rand_perm = randperm(ToyData.n);
         ToyData.X_tr = ToyData.X(rand_perm(1:n_sample), :);
         ToyData.Y_tr = ToyData.Y(rand_perm(1:n_sample), :);
         ToyData.D_tr = ToyData.D(rand_perm(1:n_sample), :);
         
-        %% para setting
+        %% para setting%% Parameter - lambda
         lam_given = 5 * sqrt(log(ToyData.p + ToyData.q) / ToyData.n_tr);
         use_given_lam = 0;
         
@@ -67,10 +63,14 @@ for ii = 1: n_step
         end
         
         
-        %% run!
-        opt = TrainPGM(ToyData, lambda_seq, kcv, opt_algs);
+        % serach for opt lambda
+        opt_para = ParaOpt(ToyData, lambda_seq, kcv, alg);
+        opt_lambda = opt_para.lambda;
+        
+        % train the model
+        opt = TrainPGM(ToyData, alg, opt_lambda);
    
-        theta_edges = (opt{1}.theta' > 0); % binary
+        theta_edges = (opt.theta' > 0); % binary
         theta_edges2 = zeros(size(theta_edges,1), size(theta_edges,2)/2);
         for jj = 1: size(theta_edges,2)/2
             theta_edges2(:,jj) = sum(theta_edges(:,(jj-1)*2+1:(jj-1)*2+2),2); % 2 states - OR op
@@ -89,6 +89,7 @@ end
 
 
 %% plot!
+TP_avg = mean(TP,2);
 FP_avg = mean(FP,2);
 TN_avg = mean(TN,2);
 FN_avg = mean(FN,2);

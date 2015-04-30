@@ -8,7 +8,6 @@ addpath(genpath('./UGM_2009'));
 addpath(genpath('./TFOCS-1.3.1'));
 addpath(genpath('./pnopt-0.9-rc'));
 
-
 %% Data
 load('./../Data/ToyData.mat', 'X', 'Y', 'D', 'p', 'q', 'L', 'n', 'thcts', 'maskDisCts', 'maskDis');
 ToyData.p = p;
@@ -33,6 +32,7 @@ else
     lambda_seq = [lam_given 0.16 0.08 0.04 0.02 0.01 0.005];
 end
 
+%% CV
 kcv = 5; % k-fold CV
 n_rep = 5;
 
@@ -67,7 +67,7 @@ for alg_idx = 1: length(opt_algs)
  
         % serach for opt lambda
         opt_para = ParaOpt(ToyData, lambda_seq, kcv, alg);
-        opt_lambda = opt_para.lamdba;
+        opt_lambda = opt_para.lambda;
         
         % train the model
         opt = TrainPGM(ToyData, alg, opt_lambda);
@@ -75,17 +75,9 @@ for alg_idx = 1: length(opt_algs)
         % test the model
         fprintf('---------------------------------------\n');
         testerr(alg_idx, rep) = PGM_predict(opt.theta, opt.alpha1, opt.beta, opt.betad, ToyData.X_te, ToyData.D_te);
-        dalg_idxsp(['Alg-' alg ' # rep-' num2str(rep) ' - Test err : ' num2str(testerr(alg_idx, rep))]);
+        disp(['Alg-' alg ' # rep-' num2str(rep) ' - Test err : ' num2str(testerr(alg_idx, rep))]);
     end
-    
-    
 end
-
-
-
-
-% save ToyRes
-
 
 
 
