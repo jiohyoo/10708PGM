@@ -29,6 +29,7 @@ alpha1 = zeros(p,1); % cts node potential param
 Lsum = [0; cumsum(L)];
 x = paramToVecv5_PGM(beta, betad, theta, alpha1, L, p);
 
+options.tfocs_opts.max_iter = 10;
 
 %% for optimal lambda, train over whole train data set
 
