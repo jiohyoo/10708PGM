@@ -14,7 +14,7 @@ addpath(genpath('./pnopt-0.9-rc'));
 % load ToyData2_q300_n1000.mat
 % load ToyData3.mat
 
-load ToyData4states.mat
+load ToyData3states.mat
 
 ToyData.p = p;
 ToyData.q = q;
@@ -39,8 +39,10 @@ else
 end
 
 %% CV
-kcv = 3; % k-fold CV
-n_rep = 1;
+trainingRatio = 0.8;
+kcv = 3;
+
+n_rep = 10;
 
 %% Optimization method
 % opt_algs = {'AT', 'GRA','LLM','N07','N83','TS','PNOPT'};
@@ -53,7 +55,7 @@ for alg_idx = 1: length(opt_algs)
     for rep = 1: n_rep
         disp(num2str(rep));
         
-        [TRAIN, TEST] = crossvalind('LeaveMOut', n , floor(n/kcv));
+        [TRAIN, TEST] = crossvalind('LeaveMOut', n , n - floor(n * trainingRatio));
         X_tr_CV = X_tr(find(TRAIN), :);
         D_tr_CV = D_tr(find(TRAIN), :);
         Y_tr_CV = Y_tr(find(TRAIN),:);
@@ -68,7 +70,7 @@ for alg_idx = 1: length(opt_algs)
         ToyData.Y_te = Y_te_CV;
         ToyData.D_te = D_te_CV;
         
-        ToyData.n_tr = n - floor(n / kcv);
+        ToyData.n_tr = floor(n * trainingRatio);
         
  
         % serach for opt lambda
