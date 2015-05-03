@@ -11,7 +11,7 @@ clear; clc;
 addpath(genpath('.'));
 
 % loading data
-data = open('./../Data/ToyData4states.mat')
+data = open('./../ToyData.mat')
 n = data.n
 % X =  data.Y 	% SNPs : discrete
 % Y =  data.X  % expression rate: conti

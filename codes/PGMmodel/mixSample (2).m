@@ -6,7 +6,7 @@ maskMarg=sparse(q,q);
 for r=1:q
     disp(['r=' num2str(r)]);
     for j=1:q
-%         disp(['q=' num2str(j)]);
+%         disp(['j=' num2str(j)]);
         
         potrj=zeros(L(r),L(j));
         if maskDis(r,j)==1
