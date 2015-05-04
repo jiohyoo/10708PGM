@@ -36,3 +36,8 @@ dlmwrite('./results/demo/Cov_Overall.txt', Cov.Overall, '\t');
 dlmwrite('./results/demo/Cov_Network_Induced.txt', Cov.Network_Induced, '\t');
 dlmwrite('./results/demo/Cov_SNP_Induced.txt', Cov.SNP_Induced, '\t');
 
+
+
+[~, e] = scggm_predict(opt.Theta, opt.intercept, X_te, Y_te);
+figure;imagesc(opt.Theta.xy);
+figure;imagesc(opt.Theta.yy);
