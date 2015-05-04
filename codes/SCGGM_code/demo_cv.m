@@ -52,3 +52,7 @@ dlmwrite(['./results/demo_cv/Beta_', num2str(k), '.txt'], Beta_k, '\t');
 dlmwrite('./results/demo_cv/Cov_Overall.txt', Cov.Overall, '\t'); 
 dlmwrite('./results/demo_cv/Cov_Network_Induced.txt', Cov.Network_Induced, '\t');
 dlmwrite('./results/demo_cv/Cov_SNP_Induced.txt', Cov.SNP_Induced, '\t');
+
+
+figure;imagesc(opt.Theta.xy);
+figure;imagesc(opt.Theta.yy);
