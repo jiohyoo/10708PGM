@@ -263,40 +263,156 @@ We used PNOPT package \cite{lee2012proximal} for implementation of proximal Newt
 
 
 \section{Experiments}
-We compare the performance of our method to lasso, multi-task lasso with $L_1/L_2$ regularization, and sparse CGGM using synthetic dataset and will compare the performances on real dataset for eQTL mapping later.
 
-\subsection{Basic Synthetic Experiments}
-We analyze the performance of our method on the synthetic dataset. We created a simple model as a ground truth with 10 discrete variables (input) and 10 continuous variables (output). The discrete variables have two possible binary states, and their node potentials is $1$ for two consecutive variables and zero otherwise. The continuous variables have $0.25$ potentials for two consecutive variables and zero otherwise. The potential between continuous and discrete variables are $1$ if they have the same index and zero otherwise.  Total 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. We analyze the performance based on the two measures: prediction error (mean squared error of predicted output) and accuracy of edge discovery (true positive and true negative out of total number of edges). To find the optimal hyper-parameters, we use 5-fold cross-validation based on the prediction error for lasso, multi-task lasso, and sparse CGGM, and the likelihood for our method.
 
-\begin{table}
-    \label{table:syn_pred_err}
-    	\caption{Prediction error on synthetic dataset with methods MG (mixed graphical model), SCGGM (sparse CGGM), Lasso, MTLasso (multi-task Lasso).}
+% % % begin
+% % % added for final
+\subsection{Synthetic Experiments}
+Before delving into real-world dataset, we run experiments on synthetic data to verify our assumptions on the behavior of our proposed model.
+
+
+\subsubsection{Synthetic Data Generation}
+We create a simple model as a ground truth with 7 discrete variables (input) and 5 continuous variables (output).
+We design the discrete variables to have three possible states to reflect the nature of SNP-gene data. We construct a chain structure for the discrete variables, where each node is linked to the following node. For two consecutive nodes that are connected by an edge, we randomly make a state-to-state interactions as following.
+
+\begin{align*}
+\centering
+0.5 * 
+\begin{bmatrix}
+  1 & 0 & -1 \\
+  0 & 1 & 0 \\
+  -1 & 0 & 1
+\end{bmatrix}
+\end{align*}
+
+The continuous variables are designed to have symmetric interactions between the nodes, where we generate random values for node-to-node interaction in range of [-1 1], and remove the edge with probability of $0.7$ until the matrix becomes positive semi-definite.
+
+For the input-output interaction, we randomly create edges with probability of $0.2$. 
+In order to reflect our assumption on the nature of SNP-gene data, and therefore verify that our proposed model excels in performance under this assumption, we design the interactions between the discrete and continuous variables that are linked via an edge to be increasing in non-linear manner with respect to the index of the states;
+we define the interactions between three states of the discrete variable and the continuous variable to be in non-linear relationship as follows: [1 1.2 6].
+
+
+
+ Total 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. 
+ We analyze the performance based on the two measures: prediction error (mean squared error of predicted output) in section and accuracy of edge discovery (true positive and true negative out of total number of edges). 
+We repeat the experiment for 10 times by randomly splitting 2000 samples into training set ($80 \%$) and test set ($20\%$), and average the prediction error.
+ To find the optimal hyper-parameters, we use 3-fold cross-validation based on the prediction errors.
+ 
+ 
+ 
+ 
+ 
+
+\subsubsection{Prediction Error}
+
+The prediction errors of proposed method, sparse CGGM, lasso, and multi-task lasso are shown in Table \ref{table:syn_pred_err}.
+Our proposed method achieves the lowest prediction error, followed by multi-task Lasso, Lasso, and SCGGM, where SCGGM achieved worst prediction with largest confidence interval.
+We can clearly see that multi-task lasso and lasso perform better prediction than SCGGM.
+The lasso family is expected to learn non-linear input-output relationships by making approximations to linear weights across the states via interpolations.
+Compared to lasso family, learning of SCGGM model takes more intricate procedures, which may have resulted in more confusion in incorporating non-linearity into the parameter learning.
+From this experimental result, we can conclude that under given assumptions on the data, where non-linear relationships between the states of input and output variables are expected, our proposed model takes advantage of the model structure, and conducts parameter learning in more desired manner.
+
+
+
+ 
+\begin{table}[hbtp]
 \begin{center}
     \begin{tabular}{| c | c |}
     \hline
     Method & Prediction Error \\
     \hline
-    MG & $3.1606 \pm 0.1238$ \\
-    SCGGM & $1.1420 \pm 0.0398$  \\
-    Lasso & $1.1244 \pm 0.0558$  \\
-    MTLasso & $1.1215 \pm 0.0263$ \\
+    \textbf{MG} & $\mathbf{1.4798 \pm 0.1811}$ \\
+    SCGGM & $2.1308 \pm 0.5252$  \\
+    Lasso & $1.8394 \pm 0.2107$  \\
+    MTLasso & $1.7950 \pm 0.1625$ \\
     \hline 
     \end{tabular}
 \end{center}
+ 	\caption{Prediction error on synthetic dataset with methods MG (mixed graphical model), SCGGM (sparse CGGM), Lasso, MTLasso (multi-task Lasso).}
+ \label{table:syn_pred_err}
 \end{table}
-Table \ref{table:syn_pred_err} shows the prediction error on test set of all methods. For the baseline methods, multi-task lasso shows the lowest prediction error, but they all lie in the confidence interval of each other, so all the baseline methods do not show the significant difference in their performance. Our method shows the highest and large prediction error. We interpret this low performance of our method as it is because of the large number of samples (2000) relatively to the number of parameters to learn. Even when the objective function is penalized by the L1 penalty, the optimization algorithm tries to maximize the objective by abandoning the sparsity of the model in the abundance of the training data.
 
-\begin{figure}[hb]
+
+
+\begin{figure}[h!]
   \centering
-  \label{fig:syn_edge_rec}
-  \includegraphics[width=3in]{figure/figure1}
-  \caption[] {Edge recovery rate of MG and SCGGM on the synthetic dataset. Edge recovery rate of SCGGM is above $95\%$ for all training sample sizes and greater than that of MG.}
+  \label{fig:pred_errbar}
+  \includegraphics[width=3in]{figure/PredErr_errorbar.png}
+  \caption[] {Boxplot of prediction errors of Mixed Graphical model (MG), sparse CGGM (SCGGM), Lasso, and Multi-task Lasso (M-Lasso)}
 \end{figure}
 
-Figure \ref{fig:syn_edge_rec} shows the accuracy of edge discovery of sparse CGGM and our method varying the number of samples used from 250 to 2000. The overall accuracy of sparse CGGM is greater than $97\%$ for all number of samples, but our method shows the lower accuracy  around $50\%$ on 250 samples and it grows to $80\%$ on increased number of samples. The accuracy is measured by averaging the accuracy of a single run over 10 times for both methods.
 
-\subsection{More Synthetic Experiments}
-As we believe the low performance of our model is due to the high simplicity and the small number of dimensions and parameters, we are planing to create a model with more dimensions and complexity and to train the models with less samples. We hope we can get results that our model is robust with relatively small size of the data as well as accurate in both prediction and edge discovery.
+
+
+\subsubsection{Edge Recovery}
+Making better predictions on gene expression based on the SNPs data is an important task in learning SNP-gene network. However, learning of the data structure itself that reveals the relationships between the SNPs-gene expression or gene expressions themselves is of great interest as making better predictions. Considering the task of structure learning, graph-based models are considered more powerful and meaningful, compared to lasso-based models.
+
+Using the same setting for the data generation, we assess how well our model and SCGGM, another graph-based model, learns the true data structure.
+We analyze the dependency of the structure learning on the sample size, by computing the accuracy of the edge recovery rate of the input-output network with varying number of samples used for model learning.
+We increase the number of sample size by 250 interval until 2000.
+The experimental results are averaged over five repeated trials.
+(Both our proposed method and SCGGM do not learn sparse-enough parameters for input-output network structure, so we threshold the recovered parameters over certain values (1 for proposed method, and 0.001 for SCGGM) to finally attain meaningful network structures.)
+
+Figure \ref{fig:syn_edge_rec} shows the edge recovery rate of our proposed method (Mixed Graphical model - MG), and SCGGM.
+We see that for the sample size of 250, SCGGM achieves slightly better edge recovery. 
+As we increase the number of sample size, our proposed method shows improvement in edge recovery rate, and converges to 1 with 750 samples. 
+On the other hand, SCGGM does not show any improvement over incremental sample size.
+The interpretation of the result is straightforward.
+Since our proposed method is capable of managing the non-linearity in the data structure, it shows expected learning curve based on the sample size.
+For SCGGM, since the structure learning is not being done as desired, increasing the sample size does not resolve the intrinsic problem of ill-learning of the model structure.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=3in]{figure/EdgeRecRate2.png}
+  \caption[] {Edge recovery rate of MG and SCGGM on the synthetic dataset.\label{fig:syn_edge_rec}}
+\end{figure}
+
+
+In Figure \ref{fig:interactions}, images of input-output, and output-output structures learned by proposed method and SCGGM are displayed with ground-truth.
+Each row shows the images of ground-truth, outcomes of proposed method, and SCGGM when the sample size is 2000, respectively.
+First two columns are outcomes of input-output network structures, and the third column is for output-output network structure. 
+Each of the first two columns shows raw parameters, and binarized parameters over threshold.
+
+We see that even when sufficient number of samples are provided for model learning, while proposed method learns and recovers perfect ground-truth input-output network structure, SCGGM fails to recover the true network structure. 
+For the network structure of output-output relationships, both proposed method and SCGGM seem to recover almost perfect structure.
+This result is understandable; while it is relatively easier for SCGGM to learn output-output network structure, it is harder for it to learn input-output network structure  due to improper underlying assumptions on the data structure.
+
+From this experimental result, we can conclude that our proposed model excels in structure recovery when the assumptions on the data are met.
+
+
+
+
+
+
+
+
+%\begin{multicols}{2}
+%%\lipsum[1-2]
+%\end{multicols}
+\begin{figure*}
+	\centering
+	\begin{tabular}{cc|c}
+	  \includegraphics[width=0.3\textwidth]{figure/GT_in_out_3states.png} &   \includegraphics[width=0.3\textwidth]{figure/GT_in_out_bin.png} &\includegraphics[width=0.3\textwidth]{figure/GT_out_out.png} \\
+	(a) & (b)  & (c) \\
+		  \includegraphics[width=0.3\textwidth]{figure/MGrec_in_out_3states.png} &   \includegraphics[width=0.3\textwidth]{figure/MGrec_in_out_bin.png} &\includegraphics[width=0.3\textwidth]{figure/MG_out_out.png} \\
+	(d) & (e) & (f) \\
+			  \includegraphics[width=0.3\textwidth]{figure/SCGGMrec_in_out.png} &   \includegraphics[width=0.3\textwidth]{figure/SCGGMrec_in_out_bin2.png} &\includegraphics[width=0.3\textwidth]{figure/SCGGM_out_out.png} \\
+	(g) & (h)  & (i) \\
+	\end{tabular}
+	\caption{Ground-Truth (GT) and recovered 'input-output' and 'output-output' interactions of Mixed Graphical model (MG), and sparse CGGM (SCGGM). (a) GT - input-output (3 states), (b) GT - input-output (binary), (c) GT - output-output, (d) MG - input-output (3 states), (e) MG - input-output (binary), (f) MG - output-output, (g) SCGGM - input-output (3 states), (h) SCGGM - input-output (binary), (i) SCGGM - output-output}
+	\label{fig:interactions}
+\end{figure*}
+%\begin{multicols}{2}
+%%  \lipsum[3-4]
+%\end{multicols}
+
+
+% % % added for final
+% % % end
+
+
+
+
 
 \subsection{Experiments on Human Liver Cohort Data}
 For learning the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} \footnote{The dataset is downloadable at \url{ https://www.synapse.org/\#!Synapse:syn4499}}. Out of 427 patients with more than 40,000 expression rates and more than 700,000 SNPs in the given data, we first extract 178 samples that contain both information on genotype and expression rates. To focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is greater than 0.05 and SNPs on chromosome 6 with minor allele frequency greater than 0.01 and pair-wise correlation less than 0.1 to select genes that are not too biased to have major allele and not too related each other according to dbSNP\footnote{\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}}. For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables with three states (0, 1, 2) and expression rates are to be continuous variables in our model. We use 143 samples for training and the remaining 35 samples for testing. For hyperparameter selection, we use 3-fold cross-validation on mean squared error.
