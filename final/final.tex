@@ -77,8 +77,12 @@
 \vskip 0.3in
 ]
 
+\begin{abstract} 
+Learning eQTL mapping between SNPs and expression rates of related proteins is important in discovering the key factors of diseases. Most previous attempts require the prior knowledge in gene expression rates or include unnatural assumptions in the encoding of SNPs. In this project, we propose conditional mixed graphical model for SNPs-gene network learning to resolve these limitations. Our approach models SNPs as discrete values to relax the unnatural assumption and does not require the prior knowledge. Our model outperforms previously proposed methods in synthetic experiment settings. Results on Human Liver Cohort dataset show that our model does not perform better than the previous methods due to the relatively high sample complexity, and it requires further analysis on the behavior of our model.
+\end{abstract} 
+
 \section{Introduction}
-Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, rather than simple correlation studies between a few clinical phenotypes and genetic variations of interest, discovering of eQTL mapping between the multiple genetic variations and multiple disease-related proteins' expression rates is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint learning of the genetic variations and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop the more efficient and accurate methods for this eQTL mappings discovery \cite{kim2010tree, sohn2012joint}. We adopted conditional undirected mixed graphical model \cite{lee2013structure} for SNP-gene network learning to relax the assumptions and lessen requirements for learning in the previous methods, and analyzed the performance of our model in both synthetic environment and real-world application.
+Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, rather than simple correlation studies between a few clinical phenotypes and genetic variations of interest, discovering eQTL mapping between the multiple genetic variations and multiple disease-related proteins' expression rates is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint learning of the genetic variations and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop the more efficient and accurate methods for this eQTL mappings discovery \cite{kim2010tree, sohn2012joint}. We adopt conditional undirected mixed graphical model \cite{lee2013structure} for SNP-gene network learning to relax the assumptions and lessen requirements for learning in the previous methods, and analyzed the performance of our model in both synthetic environment and real-world application.
 
 
 
@@ -194,7 +198,7 @@ In our work, we investigate the performance of conditional mixed graphical model
 \label{Methods}
 Our goal is to improve the method of learning SNP-gene network by adopting the conditional undirected mixed graphical model in which we can embed both discrete variables for SNPs and continuous variables for gene expression rates.
 
-\subsection{Baseline Method}
+\subsection{Mixed Graphical Model}
 Lee and coworkers \cite{lee2013structure} proposed a mixed graphical model of discrete and continuous variables, where the joint distribution is expressed as:
 
 \begin{align}
@@ -207,7 +211,7 @@ The parameters are $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\be
 
 By making further assumptions on mixed graphical models originally introduced in \cite{lauritzen1989graphical}, the mixed graphical model \ref{eq:joint} proposed by Lee \cite{lee2013structure} yields intuitive results when reformulated into various forms of distributions. The conditional distribution of continuous variables and discrete variables given the rest reduces to Gaussian linear regression, and multi-class logistic regression, respectively. Furthermore, when the data consists of continuous and discrete variables only, the model reduces to multivariate Gaussian model, and pairwise discrete Markov random field, respectively. 
 
-\subsection{Revised Method}
+\subsection{Conditional Mixed Graphical Model}
 We are interested in learning the SNP-gene network structure, and the conditional distribution of the gene expression, given observed SNPs.
 Therefore, we only need to focus on learning the conditional distribution of the network rather than learning the full joint distribution. 
 
@@ -306,7 +310,7 @@ We repeat the experiment for 10 times by randomly splitting 2000 samples into tr
 \subsubsection{Prediction Error}
 
 The prediction errors of proposed method, sparse CGGM, lasso, and multi-task lasso are shown in Table \ref{table:syn_pred_err}.
-Our proposed method achieves the lowest prediction error, followed by multi-task Lasso, Lasso, and SCGGM, where SCGGM achieved worst prediction with largest confidence interval.
+Our proposed method achieves the lowest prediction error, followed by multi-task Lasso, Lasso, and SCGGM, where SCGGM achieved worst prediction with largest variation.
 We can clearly see that multi-task lasso and lasso perform better prediction than SCGGM.
 The lasso family is expected to learn non-linear input-output relationships by making approximations to linear weights across the states via interpolations.
 Compared to lasso family, learning of SCGGM model takes more intricate procedures, which may have resulted in more confusion in incorporating non-linearity into the parameter learning.
@@ -331,16 +335,6 @@ From this experimental result, we can conclude that under given assumptions on t
  	\caption{Prediction error on synthetic dataset with methods MG (mixed graphical model), SCGGM (sparse CGGM), Lasso, MTLasso (multi-task Lasso).}
  \label{table:syn_pred_err}
 \end{table}
-
-
-
-\begin{figure}[h!]
-  \centering
-  \label{fig:pred_errbar}
-  \includegraphics[width=3in]{figure/PredErr_errorbar.png}
-  \caption[] {Boxplot of prediction errors of Mixed Graphical model (MG), sparse CGGM (SCGGM), Lasso, and Multi-task Lasso (M-Lasso)}
-\end{figure}
-
 
 
 
@@ -461,7 +455,9 @@ The prediction error on our model and other baseline models on smaller dataset a
 
 
 \section{Conclusion}
-In this project, we adopt mixed graphical model for a better generative model in discovering the eQTL mapping in SNPs-gene networks. In synthetic experiments, our model shows lower performance in both prediction error and edge recovery rate than the baseline models due to the true model's simplicity. We will conduct more synthetic experiments on more complex synthetic model and real dataset from HLC study.
+In this project, we adopt conditional mixed graphical model for a better generative model in learning the eQTL mapping in SNPs-gene networks. Our proposed model has two advantages: 1) the relaxation of unnatural assumption in encoding of SNPs in sparse CGGM and 2) the unnecessity of prior knowledge among correlated gene expression rates in each problem settings. Our assumption in the SNPs-gene network is that phenotypes of 0 or 1 minor alleles can be drastically different from those of 2 minor alleles. In synthetic experiments, we confirm that our model outperforms both in prediction error and edge recovery rate when given the data following our assumption. In experiments on Human Liver Cohort dataset, it is hard to decide whether our model performs better than the other baseline models including sparse CGGM and multiple-output regression models, and we conjecture that this is due to relatively high sample complexity of our model. The future work includes developing a faster optimization method than PNOPT and incorporating more refined from of regularization for the discovery of other types of structured sparsity patterns in the network.
+
+
 
 
 
