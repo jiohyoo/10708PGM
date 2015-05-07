@@ -298,10 +298,51 @@ Figure \ref{fig:syn_edge_rec} shows the accuracy of edge discovery of sparse CGG
 \subsection{More Synthetic Experiments}
 As we believe the low performance of our model is due to the high simplicity and the small number of dimensions and parameters, we are planing to create a model with more dimensions and complexity and to train the models with less samples. We hope we can get results that our model is robust with relatively small size of the data as well as accurate in both prediction and edge discovery.
 
-\subsection{Pre-processing SNPs-Gene Expression Data}
-For exploring the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} \footnote{The dataset is downloadable at \url{ https://www.synapse.org/\#!Synapse:syn4499}}. Out of 427 patients with more than 40,000 and more than 700,000 SNPs in the given data, we first extract 137 samples that contain both information on genotype and expression rates. To  focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is greater than 0.05 and SNPs on chromosome 6 with minor allele frequency greater than 0.01 and pair-wise correlation less than 0.1 to select genes that are not too biased to have major allele and not too related each other according to dbSNP\footnote{\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}}. For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables with three states (0, 1, 2) and expression rates are to be continuous variables in our model.
- 
-At this point, the pre-processing of this HLC dataset is finished. After more analyses on the performance and the characteristics of our method, we will run our method on this data and report the results along with other baseline methods.
+\subsection{Experiments on Human Liver Cohort Data}
+For learning the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} \footnote{The dataset is downloadable at \url{ https://www.synapse.org/\#!Synapse:syn4499}}. Out of 427 patients with more than 40,000 expression rates and more than 700,000 SNPs in the given data, we first extract 178 samples that contain both information on genotype and expression rates. To focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is greater than 0.05 and SNPs on chromosome 6 with minor allele frequency greater than 0.01 and pair-wise correlation less than 0.1 to select genes that are not too biased to have major allele and not too related each other according to dbSNP\footnote{\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}}. For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables with three states (0, 1, 2) and expression rates are to be continuous variables in our model. We use 143 samples for training and the remaining 35 samples for testing. For hyperparameter selection, we use 3-fold cross-validation on mean squared error.
+
+
+\begin{table}
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+    Method & Prediction Error \\
+    \hline
+    MG & $0.0239$ \\
+    SCGGM & $0.0246$  \\
+    Lasso & $1.6323 \times 10^{-8}$  \\
+    MTLasso & $3.1753 \times 10^{-7}$ \\
+    \hline 
+    \end{tabular}
+\end{center}
+\caption{Average prediction error on Human Liver Cohort data testset from Conditional Mixed Graphical Model (MG), Sparse Conditional Gaussian Graphical Model (SCGGM), Lasso, Multi-task Lasso with joint feature selection (MTLasso). The number of SNPs selected is 937 and the number of proteins for expression rates is 100.}
+\label{table:real_large}
+\end{table}
+
+The prediction error on our model and other baseline models are in Table \ref{table:real_large}. Our method shows lower average prediction error than SCGGM, and this shows that our assumption on genetic variation can be confirmed: the phenotypes of 0 or 1 minor alleles can be drastically different from those with 2 minor alleles, and we need discrete models for SNPs. But the traditional multi-task regression methods (Lasso, MTLasso) shows error much closer to zero. We find the explanation of this discrepancy in error from the sparsity in the parameters in each learned model. The learned coefficient matrix $\textbf{B}$ of Lasso and MTLasso has all non-zero entries, but the input-output mapping learned from MG and SCGGM has very high sparsity. Thus, we see that the Lasso and MTLasso methods make a trade-off for better prediction errors with far less interpretability, and SCGGM and MG converge to a state with very sparse model, only using output-output relationships for better prediction error. We also conjecture that the relatively high sample complexity for our model might be an obstacle for better structure learning. We wanted to further analyze the performance of our method varying settings including hyperparameter candidates and metrics for cross-validation steps, but the learning of our model takes about a week and could not analyze other behaviors on this dataset.
+
+To analyze the behaviors of our model further, we conduct the experiment on selected SNPs and gene expression rates for smaller dimensions. We strengthen the threshold for the selection of SNPs and selected fewer SNPs for our study. We select 36 SNPs with pair-wise correlation is less than 0.01 instead of 0.1. For gene expression rates, we focus on 9 HLA Class II genes following the findings from the previous study \cite{burton2007genome}. The number of samples for training and test and the model selection method are the same as the previous experiment.
+
+\begin{table}
+\begin{center}
+    \begin{tabular}{| c | c |}
+    \hline
+    Method & Prediction Error \\
+    \hline
+    MG & $0.0938$ \\
+    SCGGM & $0.0471$  \\
+    Lasso & $0.0255$  \\
+    MTLasso & $0.0217$ \\
+    \hline 
+    \end{tabular}
+\end{center}
+\caption{Average prediction error on selected SNPs and genes from Human Liver Cohort. from Conditional Mixed Graphical Model (MG), Sparse Conditional Gaussian Graphical Model (SCGGM), Lasso, Multi-task Lasso with joint feature selection (MTLasso). The number of SNPs selected is 36 and the number of proteins for expression rates is 9.}
+\label{table:real_small}
+\end{table}
+
+The prediction error on our model and other baseline models on smaller dataset are in Table \ref{table:real_small}. The prediction errors of SCGGM and our model are worse than that of Lasso, and MTLasso. The sparsity patterns in the coefficient matrix learned from Lasso and MTLasso, and input-output relationship learned from SCGGM and our model are the same as previous experiment. 
+
+
 
 \section{Conclusion}
 In this project, we adopt mixed graphical model for a better generative model in discovering the eQTL mapping in SNPs-gene networks. In synthetic experiments, our model shows lower performance in both prediction error and edge recovery rate than the baseline models due to the true model's simplicity. We will conduct more synthetic experiments on more complex synthetic model and real dataset from HLC study.
