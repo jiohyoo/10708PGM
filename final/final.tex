@@ -78,7 +78,7 @@
 ]
 
 \section{Introduction}
-Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, discovering the eQTL mapping between the genetic variations of interest and expression rates of disease-related proteins, rather than relatively simple clinical phenotypes, is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint study of the genetic variants and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop the more efficient and accurate methods for this eQTL mappings discovery. We summarize these studies in \textbf{section \ref{LiteratureReview}}. Our contribution is the adoption of conditional undirected mixed graphical model, which can embed both discrete variables for SNPs and continuous variables for gene expression rates, to learn a more accurate generative model.
+Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, rather than simple correlation studies between a few clinical phenotypes and genetic variations of interest, discovering of eQTL mapping between the multiple genetic variations and multiple disease-related proteins' expression rates is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint learning of the genetic variations and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop the more efficient and accurate methods for this eQTL mappings discovery \cite{kim2010tree, sohn2012joint}. We adopted conditional undirected mixed graphical model \cite{lee2013structure} for SNP-gene network learning to relax the assumptions and lessen requirements for learning in the previous methods, and analyzed the performance of our model in both synthetic environment and real-world application.
 
 
 
@@ -87,13 +87,9 @@ Recent progress on large scale genome-wide studies show that many human common d
 \label{LiteratureReview}
 
 
-
-
-
 \subsection{Related Work}
-
-There have been various types of solutions to the problem of learning SNPs-gene network. One popular solution is to solve the problem as multi-task regression.
-Given SNPs information as inputs, the goal is to find the regression parameters that can map the input to the outputs of gene expressions, which can reveal the structured sparsity in input and output as well.
+There have been various types of solutions to the problem of learning SNPs-gene network. One popular solution is to solve the problem as multiple-output regression, a straight-forward extension of single-output regression. 
+Given SNPs information as inputs, multiple-output regression tries to solve the regression task for each output simultaneously while sharing the coefficient matrix for all the tasks. It can incorporate L-1 penalty (lasso) for sparse model and L-21 mixed penalty for desired sparsity pattern in the coefficient matrix \cite{obozinski2008high}.
 
 
 
@@ -146,7 +142,7 @@ In this project, we would like to extend the basic concepts proposed by Sohn  \c
 
 
 \subsection{Background}
-One of the most commonly used method in estimation of SNP-gene network is standard regression method with lasso penalty \cite{tibshirani1996regression}, which solves the following optimization problem.
+One of the most commonly used method in estimation of SNP-gene network is the multiple-output extension of single-output regression method with lasso penalty \cite{tibshirani1996regression}, which solves the following optimization problem.
 
 \begin{align}\label{eq:lasso}
 \text{arg} \min_{\textbf{B}} \text{tr}((\mathbf{Y}-\mathbf{XB})(\mathbf{Y}-\mathbf{XB})^T) + \lambda \| \mathbf{B}\|_1,
@@ -154,20 +150,13 @@ One of the most commonly used method in estimation of SNP-gene network is standa
 
 where $\mathbf{X}=(\mathbf{x_1}, ... ,\mathbf{x_N})^T$, $\mathbf{Y}=(\mathbf{y_1}, ... ,\mathbf{y_N})^T$ are input and output data, and $\mathbf{x_i}=(x_{i1}, ... ,x_{iJ})^T \in \mathbb{R}^J$, and $\mathbf{y_i}=(y_{i1}, ... ,y_{iK})^T \in \mathbb{R}^K$.
 The output is estimated by regression: $\mathbf{y_i}=\mathbf{Bx_i}+\mathbf{\varepsilon_i}$, where $\varepsilon  \sim \mathcal{N}(0, \mathbf{\Psi})$.
-By enforcing sparsity in \textbf{B}, it is able to take into account of the problem setting that we have $J >> N$ (SNPs data comprises of high-dimensional vector).
-
-To address problem of learning structured sparsity and ouput structure using regression model, Sohn \cite{sohn2012joint} proposed a model that extends the problem of learning standard regression model into learning Gaussian graphical model.
-
-By formulating the joint distribution of input and output as \ref{eq:jointG}, where $ \mathbf{\Sigma}^{-1}= \begin{pmatrix}
-    \mathbf{\Theta}_{xx} & \mathbf{\Theta}_{xy}\\
-   \mathbf{\Theta}_{xy}^T &  \mathbf{\Theta}_{yy}  
-\end{pmatrix}$,
-the authors show that it can be interpreted as different parameterization of standard regression model \ref{eq:lasso} by setting $\mathbf{B}=\mathbf{\Sigma}_{xy}^T \mathbf{\Sigma}_{xx}^{-1}=-\mathbf{\Theta}_{yy}^{-1}\mathbf{\Theta}_{xy}^T$, and $\mathbf{\Psi}= \mathbf{\Theta}_{yy}^{-1}$.
+By enforcing sparsity in \textbf{B}, it is able to take into account of the problem setting that we have $J >> N$, where the number of SNPs is higher than the number of samples. Also, using L-1/L-2 mixed norm penalty can be used for joint feature selection \cite{obozinski2008high}.
 
 
+Despite the simple formulation and optimization method for multiple-output regression, it does not capture the relatedness among the output variables in the data. To address this problem of learning structured sparsity and structure in output variables, Graph-guided Fused Lasso is developed with fusion penalty according to pre-computed degree of relatedness among the output \cite{kim2009statistical}, but it needs prior knowledge of the data, which can differ by each problem setting and its problem domain. To overcome this problem of necessity of prior knowledge, Sohn and coworkers proposed Sparse Conditional Gaussian Graphical Model, which extends the problem of learning standard regression model into learning a conditional Gaussian graphical model \cite{sohn2012joint}. It assumes that the joint distribution of input and output as a single multivariate Gaussian distribution as Eq. \ref{eq:jointG}.
 
 \begin{align}\label{eq:jointG}
-%\[
+\begin{split}
 \begin{bmatrix}
     \mathbf{x_i}\\
     \mathbf{y_i}
@@ -180,24 +169,25 @@ the authors show that it can be interpreted as different parameterization of sta
 \end{bmatrix}
 ,
     \Sigma
+\end{pmatrix} \\
+\mathbf{\Sigma}^{-1}= \begin{pmatrix}
+    \mathbf{\Theta}_{xx} & \mathbf{\Theta}_{xy}\\
+   \mathbf{\Theta}_{xy}^T &  \mathbf{\Theta}_{yy}  
 \end{pmatrix}
-%\]
+\end{split}
 \end{align}
+Then, the parameters $\Theta$ and $\Phi$ in Eq. \ref{eq:lasso} can be reconstructed by $\mathbf{B}=\mathbf{\Sigma}_{xy}^T \mathbf{\Sigma}_{xx}^{-1}=-\mathbf{\Theta}_{yy}^{-1}\mathbf{\Theta}_{xy}^T$, and $\mathbf{\Psi}= \mathbf{\Theta}_{yy}^{-1}$.
 
-Although the method by Sohn suits the needs for the SNP-gene network estimation problem in a way that it learns both structured sparsity and output structure, and formulates the problem using the standard regression problem, the underlying assumption is that both input and output data constitute of continuous variables. 
+Although this method by Sohn suits the needs for the SNP-gene network estimation problem as it learns both structured sparsity in $\Theta$ and output structure in $\Phi$, and formulates the problem using the standard regression problem, the underlying assumption is that both input and output data constitute of continuous variables. This assumption is from that the degree of genetic variation, the deviation from major alleles, can be measured by the number of minor alleles in a person's genotype, and the relationship between the deviation and output is linear. However, the phenotypes from genes with 0 or 1 minor alleles can be drastically different from those of 2 minor alleles in many cases including examples from Mendel's Law.  Thus, it is reasonable approach to relax this assumption in the previously developed regression models and model the SNPs as categorical, discrete values.
 
-By raising question of how to estimate SNPs-gene network in more natural way, we turn our attention to other various types of graphical models that can reflect the nature of discrete and continuous variables. 
-
-For continuous variables, multivariate Gaussian model is one of the commonly used graphical model, $y \sim \mathcal{N}(0, \Theta^{-1})$, where the inverse covariance $\Theta$ is estimated via graphical lasso. For discrete variables, pairwise Markov random field $p(x) \propto exp \sum_{r\leq j} \phi_{rj}(x_r, x_j)$ is one of the commonly used graphical model.
-Studies on mixed graphical model, which combines two commonly used graphical models of Gaussian and pair-wise graphical models so that it can handle data consisting of both continuous and discrete variables, have been conducted by authors in \cite{lauritzen1989graphical}, where the conditional distribution is modeled as $p(y|x) = \mathcal{N}(\mu(x), \Sigma(x))$. 
+As with the previous models, continuous variables can be modeled as a multivariate Gaussian: $y \sim \mathcal{N}(0, \Theta^{-1})$, where the inverse covariance matrix $\Theta$ can be estimated via graphical lasso. For discrete variables, pairwise Markov random field $p(x) \propto exp \sum_{r\leq j} \phi_{rj}(x_r, x_j)$ is one of the commonly used graphical model.
+Studies on mixed graphical model, which combines two commonly used graphical models of Gaussian and pair-wise graphical models so that it can handle data consisting of both continuous and discrete variables, have been conducted by Lauritzen and coworkers, where the conditional distribution is modeled as $p(y|x) = \mathcal{N}(\mu(x), \Sigma(x))$ \cite{lauritzen1989graphical}.
 Despite of the novelty and specific applications of the mixed graphical model, it has not been used as widely due to its complexity in learning the parameters, and lack of intuition when derived to the other types of distributions.
 
-The authors in \cite{lee2013structure} have proposed a special case of the mixed graphical model that resolves the problem of the complexity in parameter learning, and vague forms of derived distributions, by making several assumptions.
+Lee and coworkers \cite{lee2013structure} have proposed a special case of the mixed graphical model that resolves the problem of the complexity in parameter learning and vague forms of derived distributions by making several assumptions.
  The detailed explanation follows in section \ref{Methods}.
  
-In our work, we plan to investigate the behavior of mixed graphical model, whose assumption on the types of data it can handle does not violate our problem setting for SNP-gene network estimation. We plan to compare the performance of the mixed graphical model when applied to SNP-gene network estimation problem, and that of commonly used method.
-
-
+In our work, we investigate the performance of conditional mixed graphical model, whose assumption on the types of data it can handle does not violate our problem setting for SNP-gene network estimation. We compare the performance of the mixed graphical model when applied to SNP-gene network estimation problem, and that of commonly used method.
 
 
 \section{Methods}
