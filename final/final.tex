@@ -92,61 +92,7 @@ Recent progress on large scale genome-wide studies show that many human common d
 
 
 \subsection{Related Work}
-There have been various types of solutions to the problem of learning SNPs-gene network. One popular solution is to solve the problem as multiple-output regression, a straight-forward extension of single-output regression. 
-Given SNPs information as inputs, multiple-output regression tries to solve the regression task for each output simultaneously while sharing the coefficient matrix for all the tasks. It can incorporate L-1 penalty (lasso) for sparse model and L-21 mixed penalty for desired sparsity pattern in the coefficient matrix \cite{obozinski2008high}.
-
-
-
-
-Tree-guided group lasso, or GFlasso was proposed by Kim and coworkers \cite{kim2010tree}.
-GFlasso aims to learn the common set of inputs for each cluster of outputs, using group lasso penalty and systematic weighting scheme for inputs, where inputs are grouped together to be mapped to the outputs, and output clusters with strong correlation are guided to share common input groups.
-GFlasso requires the prior knowledge of output tree structure, which is not always possible.
-Also, the weighting scheme of guiding the common set of inputs for highly correlated clusters is such a strong assumption that may not be true in reality.
-
-
-An algorithm called multivariate regression with covariance estimation (MRCE) that aims to learn both multivariate regression parameters and the correlation of outputs was introduced by Rothman and coworkers \cite{rothman2010sparse}.
-By regularizing regression parameter and correlation matrix separately, the MRCE solve bi-convex problem, which may not lead to the global optimum. Although MRCE is favorable in a way that it learns the output structure, MRCE does not force structured sparsity when learning regression parameters for inputs, which is an important property when dealing with SNPs-gene data.
-
-
-An algorithm that bring together the advantages of the two previous works \cite{kim2010tree} \cite{rothman2010sparse} was introduced by Sohn and coworkers \cite{sohn2012joint}. 
-The proposed algorithm jointly learns regression parameters and output structure with constraint of structure sparsity in inputs, by learning conditional Gaussian graph model.
-Although proposed algorithm resolves the main problems in previous studies, it assumes that input and output are treated as continuous data, which is not true for SNPs-gene data.
-Therefore, it leaves some space for further refinement of the assumptions used in this algorithm.
-
-
-
-
-
-
-
-
-
-In order to solve the problem in more natural way, we can adopt 'mixed graphical models' into our problem.
-Mixed graphical models refer to graphical models that allow for both discrete and continuous variables.
-
-
-Lauritzen first proposed a mixed graphical model for variables of both discrete and continuous \cite{lauritzen1989graphical}.
- Although this mixed graphical model is carefully designed for general cases, this makes resulting conditional distribution complex. Also, the mean and covariance matrices exist for every possible configurations of states of discrete variables, which results in exponential increase in number of parameters to learn depending on the number of discrete variables.
-
-
-
-
-Later by Jason and coworkers, the mixed graphical model was further developed into more simplified and intuitive version \cite{lee2013structure}. 
-The authors proposed a mixed graphical model that provides intuitive forms of conditional distributions: conditional distribution of a discrete variable reduces to multi-class logistic regression, and that of a continuous variable to Gaussian linear regression. 
-By making assumptions on the general mixed graphical models  \cite{lauritzen1989graphical}, proposed algorithm scales up more efficiently: it has common covariance matrix, and additive mean.
-
-
-To our knowledge, there has not been any study that learns the SNP-gene network as multi-task regression problem using mixed graphical models. 
-In this project, we would like to extend the basic concepts proposed by Sohn  \cite{sohn2012joint} using mixed graph models \cite{lee2013structure}, to solve the problem in more natural way.
-
-
-
-
-
-
-
-\subsection{Background}
-One of the most commonly used method in estimation of SNP-gene network is the multiple-output extension of single-output regression method with lasso penalty \cite{tibshirani1996regression}, which solves the following optimization problem.
+One of the most commonly used method in estimation of SNPs-gene network is the multiple-output extension of single-output regression method. Given SNPs information as inputs, multiple-output regression tries to solve the regression task for each output simultaneously while sharing the coefficient matrix for all the tasks. It can incorporate L-1 penalty (lasso) \cite{tibshirani1996regression} for sparse model. The regression problem can be formulated as in Eq. \ref{eq:lasso}
 
 \begin{align}\label{eq:lasso}
 \text{arg} \min_{\textbf{B}} \text{tr}((\mathbf{Y}-\mathbf{XB})(\mathbf{Y}-\mathbf{XB})^T) + \lambda \| \mathbf{B}\|_1,
@@ -154,10 +100,17 @@ One of the most commonly used method in estimation of SNP-gene network is the mu
 
 where $\mathbf{X}=(\mathbf{x_1}, ... ,\mathbf{x_N})^T$, $\mathbf{Y}=(\mathbf{y_1}, ... ,\mathbf{y_N})^T$ are input and output data, and $\mathbf{x_i}=(x_{i1}, ... ,x_{iJ})^T \in \mathbb{R}^J$, and $\mathbf{y_i}=(y_{i1}, ... ,y_{iK})^T \in \mathbb{R}^K$.
 The output is estimated by regression: $\mathbf{y_i}=\mathbf{Bx_i}+\mathbf{\varepsilon_i}$, where $\varepsilon  \sim \mathcal{N}(0, \mathbf{\Psi})$.
-By enforcing sparsity in \textbf{B}, it is able to take into account of the problem setting that we have $J >> N$, where the number of SNPs is higher than the number of samples. Also, using L-1/L-2 mixed norm penalty can be used for joint feature selection \cite{obozinski2008high}.
+
+By enforcing sparsity in \textbf{B}, it is able to take into account of the problem setting that we have $J >> N$, where the number of SNPs is higher than the number of samples. Also, using L-1/L-2 mixed norm penalty can also be used for joint feature selection \cite{obozinski2008high}.
 
 
-Despite the simple formulation and optimization method for multiple-output regression, it does not capture the relatedness among the output variables in the data. To address this problem of learning structured sparsity and structure in output variables, Graph-guided Fused Lasso is developed with fusion penalty according to pre-computed degree of relatedness among the output \cite{kim2009statistical}, but it needs prior knowledge of the data, which can differ by each problem setting and its problem domain. To overcome this problem of necessity of prior knowledge, Sohn and coworkers proposed Sparse Conditional Gaussian Graphical Model, which extends the problem of learning standard regression model into learning a conditional Gaussian graphical model \cite{sohn2012joint}. It assumes that the joint distribution of input and output as a single multivariate Gaussian distribution as Eq. \ref{eq:jointG}.
+
+Despite the simple formulation and optimization method for multiple-output regression, it does not capture the relatedness among the output variables in the data. To address this problem of learning structured sparsity and structure in output variables, Graph-guided Fused Lasso is developed with fusion penalty according to pre-computed degree of relatedness among the output \cite{kim2009statistical}. However, it needs prior knowledge of the data, which can differ by each problem setting and its problem domain. 
+
+Rothman and coworkers \cite{rothman2010sparse} introduced Multivariate Regression with Covariance Estimation (MRCE) that aims to learn both multivariate regression parameters and the correlation of outputs. By regularizing regression parameter and correlation matrix separately, the MRCE solves bi-convex problem, which may not lead to the global optimum. Although MRCE is favorable in a way that it learns the output structure, MRCE does not force structured sparsity when learning regression parameters for inputs, which is an important property when dealing with SNPs-gene data.
+
+
+Sohn and coworkers \cite{sohn2012joint} introduced Sparse Gaussian Graphical Model that brings together the advantages of the two previous works by extending the problem of learning standard regression model into learning a sparse conditional Gaussian graphical model. It jointly models the input and output as a multivariate Gaussian distribution and learns the conditional model of output given input as in Eq. \ref{eq:jointG}.
 
 \begin{align}\label{eq:jointG}
 \begin{split}
@@ -180,18 +133,21 @@ Despite the simple formulation and optimization method for multiple-output regre
 \end{pmatrix}
 \end{split}
 \end{align}
-Then, the parameters $\Theta$ and $\Phi$ in Eq. \ref{eq:lasso} can be reconstructed by $\mathbf{B}=\mathbf{\Sigma}_{xy}^T \mathbf{\Sigma}_{xx}^{-1}=-\mathbf{\Theta}_{yy}^{-1}\mathbf{\Theta}_{xy}^T$, and $\mathbf{\Psi}= \mathbf{\Theta}_{yy}^{-1}$.
+Then, the parameters $\mathbf{\Theta}$ and $\mathbf{\Phi}$ in Eq. \ref{eq:lasso} can be reconstructed by $\mathbf{B}=\mathbf{\Sigma}_{xy}^T \mathbf{\Sigma}_{xx}^{-1}=-\mathbf{\Theta}_{yy}^{-1}\mathbf{\Theta}_{xy}^T$, and $\mathbf{\Psi}= \mathbf{\Theta}_{yy}^{-1}$.
 
-Although this method by Sohn suits the needs for the SNP-gene network estimation problem as it learns both structured sparsity in $\Theta$ and output structure in $\Phi$, and formulates the problem using the standard regression problem, the underlying assumption is that both input and output data constitute of continuous variables. This assumption is from that the degree of genetic variation, the deviation from major alleles, can be measured by the number of minor alleles in a person's genotype, and the relationship between the deviation and output is linear. However, the phenotypes from genes with 0 or 1 minor alleles can be drastically different from those of 2 minor alleles in many cases including examples from Mendel's Law.  Thus, it is reasonable approach to relax this assumption in the previously developed regression models and model the SNPs as categorical, discrete values.
 
-As with the previous models, continuous variables can be modeled as a multivariate Gaussian: $y \sim \mathcal{N}(0, \Theta^{-1})$, where the inverse covariance matrix $\Theta$ can be estimated via graphical lasso. For discrete variables, pairwise Markov random field $p(x) \propto exp \sum_{r\leq j} \phi_{rj}(x_r, x_j)$ is one of the commonly used graphical model.
-Studies on mixed graphical model, which combines two commonly used graphical models of Gaussian and pair-wise graphical models so that it can handle data consisting of both continuous and discrete variables, have been conducted by Lauritzen and coworkers, where the conditional distribution is modeled as $p(y|x) = \mathcal{N}(\mu(x), \Sigma(x))$ \cite{lauritzen1989graphical}.
-Despite of the novelty and specific applications of the mixed graphical model, it has not been used as widely due to its complexity in learning the parameters, and lack of intuition when derived to the other types of distributions.
+Although this method by Sohn suits the needs for the SNPs-gene network estimation problem as it learns both structured sparsity in $\Theta$ and output structure in $\Phi$, and formulates the problem using the standard regression problem, the underlying assumption is that both input and output data constitute of continuous variables. This assumption is from that the degree of genetic variation, the deviation from major alleles, can be measured by the number of minor alleles in a person's genotype, and the relationship between the deviation and the output is linear. However, the phenotypes from genes with 0 or 1 minor alleles can be drastically different from those of 2 minor alleles in many cases including examples from Mendel's Law.  Thus, it is reasonable approach to model SNPs as categorical, discrete values to relax this assumption in the previously developed regression models. 
+
+
+Mixed graphical models refer to graphical models that contains both discrete and continuous variables. Lauritzen and coworkers \cite{lauritzen1989graphical} combined two commonly used graphical models so that it can handle data consisting of both continuous and discrete variables as: $p(y|x) = \mathcal{N}(\mu(x), \Sigma(x))$. Despite of the novelty and specific applications of the mixed graphical model, it has not been used as widely due to its complexity in learning the parameters, and lack of intuition when derived to the other types of distributions.
+
 
 Lee and coworkers \cite{lee2013structure} have proposed a special case of the mixed graphical model that resolves the problem of the complexity in parameter learning and vague forms of derived distributions by making several assumptions.
- The detailed explanation follows in section \ref{Methods}.
- 
-In our work, we investigate the performance of conditional mixed graphical model, whose assumption on the types of data it can handle does not violate our problem setting for SNP-gene network estimation. We compare the performance of the mixed graphical model when applied to SNP-gene network estimation problem, and that of commonly used method.
+The conditional distribution of a discrete variable reduces to multi-class logistic regression, and that of a continuous variable to Gaussian linear regression.
+By sharing common covariance matrix and additive mean property, the newly proposed algorithm scales up more efficiently.
+
+
+To our knowledge, there has not been any study that learns the SNPs-gene network using mixed graphical models. In later sections, we investigate the performance of conditional mixed graphical model, whose assumption on the types of data it can handle does not violate our problem setting for SNPs-gene network estimation. 
 
 
 \section{Methods}
