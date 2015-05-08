@@ -78,7 +78,7 @@
 ]
 
 \begin{abstract} 
-Learning eQTL mapping between SNPs and expression rates of related proteins is important in discovering the key factors of diseases. Most previous attempts require the prior knowledge in gene expression rates or include unnatural assumptions in the encoding of SNPs. In this project, we propose conditional mixed graphical model for SNPs-gene network learning to resolve these limitations. Our approach models SNPs as discrete values to relax the unnatural assumption and does not require the prior knowledge. Our model outperforms previously proposed methods in synthetic experiment settings. Results on Human Liver Cohort dataset show that our model does not perform better than the previous methods due to the relatively high sample complexity, and it requires further analysis on the behavior of our model.
+Learning eQTL mapping between SNPs and expression rates of related proteins is important in discovering the key factors of diseases. Most previous attempts require the prior knowledge in gene expression rates or include unnatural assumptions for the representations of SNPs. In this project, we propose conditional mixed graphical model for SNPs-gene network learning to resolve these limitations. Our approach models SNPs as discrete values to relax the unnatural assumption and does not require the prior knowledge for learning the network. Our model outperforms previously proposed methods in synthetic experiment settings. Results on Human Liver Cohort dataset show that our model does not perform better than the previous methods due to the relatively high sample complexity, and it requires further analysis on the behavior of our model.
 \end{abstract} 
 
 \section{Introduction}
@@ -233,7 +233,7 @@ Before delving into real-world dataset, we run experiments on synthetic data to 
 
 \subsubsection{Synthetic Data Generation}
 We create a simple model as a ground truth with 7 discrete variables (input) and 5 continuous variables (output).
-We design the discrete variables to have three possible states to reflect the nature of SNP-gene data. We construct a chain structure for the discrete variables, where each node is linked to the following node. For two consecutive nodes that are connected by an edge, we randomly make a state-to-state interactions as following.
+We design the discrete variables to have three possible states to reflect the nature of SNPs. We construct a chain structure for the discrete variables, where each node is linked to the following node. For two consecutive nodes that are connected by an edge, with probability of 0.5, we create a state-to-state interactions as following with 
 
 \begin{align*}
 \centering
@@ -245,17 +245,16 @@ We design the discrete variables to have three possible states to reflect the na
 \end{bmatrix}
 \end{align*}
 
-The continuous variables are designed to have symmetric interactions between the nodes, where we generate random values for node-to-node interaction in range of [-1 1], and remove the edge with probability of $0.7$ until the matrix becomes positive semi-definite.
-
+The continuous variables are designed to have symmetric interactions between the nodes, where we generate random values for node-to-node interaction in range of [-1, 1], and remove the edge with probability of $0.7$ maintaining the positive semi-definteness of the matrix. 
 For the input-output interaction, we randomly create edges with probability of $0.2$. 
-In order to reflect our assumption on the nature of SNP-gene data, and therefore verify that our proposed model excels in performance under this assumption, we design the interactions between the discrete and continuous variables that are linked via an edge to be increasing in non-linear manner with respect to the index of the states;
-we define the interactions between three states of the discrete variable and the continuous variable to be in non-linear relationship as follows: [1 1.2 6].
+In order to reflect our assumption on the nature of SNPs-gene data, and therefore verify that our proposed model excels in performance under this assumption, we design the interactions between discrete and continuous variables that are linked via an edge to be increasing in non-linear manner with respect to the index of the states;
+we define the interactions between three states of the discrete variable and the continuous variable to be in non-linear relationship as follows: 1 to 1.2 to 6.
 
 
 
  Total 2000 samples are sampled from the true model and used for estimating the edges between the discrete variables and the continuous variables. 
- We analyze the performance based on the two measures: prediction error (mean squared error of predicted output) in section and accuracy of edge discovery (true positive and true negative out of total number of edges). 
-We repeat the experiment for 10 times by randomly splitting 2000 samples into training set ($80 \%$) and test set ($20\%$), and average the prediction error.
+ We analyze the performance based on the two measures: average prediction error (average mean squared error of predicted output) and accuracy of edge recovery (true positive and true negative out of total number of edges).
+We repeat the experiment for 10 times by randomly splitting 2000 samples into training set ($80\%$) and test set ($20\%$), and average the prediction error.
  To find the optimal hyper-parameters, we use 3-fold cross-validation based on the prediction errors.
  
  
@@ -266,7 +265,7 @@ We repeat the experiment for 10 times by randomly splitting 2000 samples into tr
 \subsubsection{Prediction Error}
 
 The prediction errors of proposed method, sparse CGGM, lasso, and multi-task lasso are shown in Table \ref{table:syn_pred_err}.
-Our proposed method achieves the lowest prediction error, followed by multi-task Lasso, Lasso, and SCGGM, where SCGGM achieved worst prediction with largest variation.
+Our proposed method achieves the lowest prediction error, followed by multi-task Lasso, Lasso, and SCGGM, where SCGGM achieves the worst prediction with the largest variation.
 We can clearly see that multi-task lasso and lasso perform better prediction than SCGGM.
 The lasso family is expected to learn non-linear input-output relationships by making approximations to linear weights across the states via interpolations.
 Compared to lasso family, learning of SCGGM model takes more intricate procedures, which may have resulted in more confusion in incorporating non-linearity into the parameter learning.
@@ -295,9 +294,9 @@ From this experimental result, we can conclude that under given assumptions on t
 
 
 \subsubsection{Edge Recovery}
-Making better predictions on gene expression based on the SNPs data is an important task in learning SNP-gene network. However, learning of the data structure itself that reveals the relationships between the SNPs-gene expression or gene expressions themselves is of great interest as making better predictions. Considering the task of structure learning, graph-based models are considered more powerful and meaningful, compared to lasso-based models.
+Learning the underlying structure of the dataset that can reveal SNPs-gene expression rates or gene expression rates themselves is of great interest as achieving better prediction errors. Graph-base models, sparse CGGM and mixed graphical model, are considered more powerful and meaningful as they can capture the conditional independence relationships among the variables, compared to multiple-output regression models.
 
-Using the same setting for the data generation, we assess how well our model and SCGGM, another graph-based model, learns the true data structure.
+Using the same settings for the data generation, we assess how well our model and SCGGM learn the true data structure.
 We analyze the dependency of the structure learning on the sample size, by computing the accuracy of the edge recovery rate of the input-output network with varying number of samples used for model learning.
 We increase the number of sample size by 250 interval until 2000.
 The experimental results are averaged over five repeated trials.
@@ -411,7 +410,7 @@ The prediction error on our model and other baseline models on smaller dataset a
 
 
 \section{Conclusion}
-In this project, we adopt conditional mixed graphical model for a better generative model in learning the eQTL mapping in SNPs-gene networks. Our proposed model has two advantages: 1) the relaxation of unnatural assumption in encoding of SNPs in sparse CGGM and 2) the unnecessity of prior knowledge among correlated gene expression rates in each problem settings. Our assumption in the SNPs-gene network is that phenotypes of 0 or 1 minor alleles can be drastically different from those of 2 minor alleles. In synthetic experiments, we confirm that our model outperforms both in prediction error and edge recovery rate when given the data following our assumption. In experiments on Human Liver Cohort dataset, it is hard to decide whether our model performs better than the other baseline models including sparse CGGM and multiple-output regression models, and we conjecture that this is due to relatively high sample complexity of our model. The future work includes developing a faster optimization method than PNOPT and incorporating more refined from of regularization for the discovery of other types of structured sparsity patterns in the network.
+In this project, we adopt conditional mixed graphical model for a better generative model in learning the eQTL mapping in SNPs-gene networks. Our proposed model has two advantages: 1) the relaxation of unnatural assumption in encoding of SNPs in sparse CGGM and 2) the unnecessity of prior knowledge among correlated gene expression rates in each problem settings. Our assumption in the SNPs-gene network is that phenotypes of 0 or 1 minor alleles can be drastically different from those of 2 minor alleles. In synthetic experiments, we confirm that our model outperforms both in prediction error and edge recovery rate when given the data following our assumption. In experiments on Human Liver Cohort dataset, it is hard to decide whether our model performs better than the other baseline models including sparse CGGM and multiple-output regression models, and we conjecture that this is due to relatively high sample complexity of our model. The future work includes developing a faster optimization method than PNOPT and incorporating more refined form of regularization for the discovery of other types of structured sparsity patterns in the network.
 
 
 
