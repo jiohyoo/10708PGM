@@ -78,21 +78,25 @@
 ]
 
 \begin{abstract} 
-Learning eQTL mapping between SNPs and expression rates of related proteins is important in discovering the key factors of diseases. Most previous attempts require the prior knowledge in gene expression rates or include unnatural assumptions for the representations of SNPs. In this project, we propose conditional mixed graphical model for SNPs-gene network learning to resolve these limitations. Our approach models SNPs as discrete values to relax the unnatural assumption and does not require the prior knowledge for learning the network. Our model outperforms previously proposed methods in synthetic experiment settings. Results on Human Liver Cohort dataset show that our model does not perform better than the previous methods due to the relatively high sample complexity, and it requires further analysis on the behavior of our model.
+Learning expression quantitative trait locus (eQTL) mapping between single-nucleotide polymorphisms (SNPs) and expression rates of related proteins is important in discovering key factors of the diseases. Most of the previous approaches require prior knowledge in gene expression rates or enforce unnatural assumptions in the representations of SNPs. In this project, we propose a conditional mixed graphical model for SNPs-gene network learning that resolves these limitations. Our approach models SNPs as discrete values to relax the unnatural assumption and does not require prior knowledge of the output structure for learning SNPs-gene network. Experimental results on synthetic data show that our model outperforms previously proposed methods in prediction error and edge recovery rate. Experimental results on Human Liver Cohort dataset show that our model does not demonstrate improved performance compared to the previous methods due to the relatively high sample complexity. More in-depth analysis on the behavior of our model is left as further work.
 \end{abstract} 
 
 \section{Introduction}
-Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, rather than simple correlation studies between a few clinical phenotypes and genetic variations of interest, discovering eQTL mapping between the multiple genetic variations and multiple disease-related proteins' expression rates is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint learning of the genetic variations and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop the more efficient and accurate methods for this eQTL mappings discovery \cite{kim2010tree, sohn2012joint}. We adopt conditional undirected mixed graphical model \cite{lee2013structure} for SNP-gene network learning to relax the assumptions and lessen requirements for learning in the previous methods, and analyzed the performance of our model in both synthetic environment and real-world application.
+Recent progress on large scale genome-wide studies show that many human common diseases, including diabetes, asthma, and cancer, consist of complex reactions of proteins, which are controlled by regulatory networks and are expressed from highly correlated genetic variations \cite{basso2005reverse, chen2008variations}. Thus, rather than simple correlation studies between a few clinical phenotypes and genetic variations of interest, discovering expression quantitative trait locus (eQTL) mapping between the multiple genetic variations and multiple disease-related proteins' expression rates is necessary to analyze the occurrence mechanism of the diseases and the functional roles of those proteins in the mechanism. This requires the joint learning of the genetic variations and the expression of the related proteins rather than combining the results from the independent study on each genome or phenome. 
 
+Multiple regression studies have been conducted to identify these mappings between single-nucleotide polymorphisms (SNPs) and related gene expression rates, and to develop more efficient and accurate methods for discovery of these mappings \cite{kim2010tree, sohn2012joint}. However, all of the previous methods enforce unnatural assumption on the representation of SNPs. Although SNPs information is represented as discrete states of 0, 1, or 2, based on the degree of deviation from major alleles, previous methods convert these discrete values into continuous values, and treat them as if relationship between the deviation and the output is linear.
+
+In this project, we adopt conditional undirected mixed graphical model \cite{lee2013structure} for SNP-gene network learning to relax the unnatural assumptions on the representation of SNPs and lessen requirements for learning in the previous methods. We adopt discrete representations of SNPs as it is without making assumptions on the linear relationship between the genetic deviation and gene expression rates.
+We generate synthetic dataset that reflects our hypothesis on the nature of the SNPs-gene expression data, and analyze the performance of our proposed model in prediction error and edge recovery rate. We conduct experiment on real-world dataset to convince whether our hypothesis is correct and investigate the behavior of our proposed model.
+
+The organization of the report is as follows. In section \ref{LiteratureReview}, we discuss previous works in more detail. We briefly introduce previous methods and address limitations of them. In section \ref{Methods}, we introduce our proposed model. We explain how we reformulate the existing model to fit our problem, and the optimization method we used. In section \ref{Experiments}, we discuss our experimental results on synthetic dataset and a real-world dataset. Finally, we close our report in section \ref{Conclusion}.
 
 
 
 \section{Background \& Related Work}
 \label{LiteratureReview}
 
-
-\subsection{Related Work}
-One of the most commonly used method in estimation of SNPs-gene network is the multiple-output extension of single-output regression method. Given SNPs information as inputs, multiple-output regression tries to solve the regression task for each output simultaneously while sharing the coefficient matrix for all the tasks. It can incorporate L-1 penalty (lasso) \cite{tibshirani1996regression} for sparse model. The regression problem can be formulated as in Eq. \ref{eq:lasso}
+One of the most commonly used methods in estimation of SNPs-gene network is the multiple-output extension of single-output regression method. Given SNPs information as inputs, multiple-output regression tries to solve the regression problem for each output simultaneously while sharing the coefficient matrix for all the tasks. It can incorporate L-1 penalty (lasso) \cite{tibshirani1996regression} for sparse model. The regression problem can be formulated as in Eq. \ref{eq:lasso}
 
 \begin{align}\label{eq:lasso}
 \text{arg} \min_{\textbf{B}} \text{tr}((\mathbf{Y}-\mathbf{XB})(\mathbf{Y}-\mathbf{XB})^T) + \lambda \| \mathbf{B}\|_1,
@@ -101,13 +105,13 @@ One of the most commonly used method in estimation of SNPs-gene network is the m
 where $\mathbf{X}=(\mathbf{x_1}, ... ,\mathbf{x_N})^T$, $\mathbf{Y}=(\mathbf{y_1}, ... ,\mathbf{y_N})^T$ are input and output data, and $\mathbf{x_i}=(x_{i1}, ... ,x_{iJ})^T \in \mathbb{R}^J$, and $\mathbf{y_i}=(y_{i1}, ... ,y_{iK})^T \in \mathbb{R}^K$.
 The output is estimated by regression: $\mathbf{y_i}=\mathbf{Bx_i}+\mathbf{\varepsilon_i}$, where $\varepsilon  \sim \mathcal{N}(0, \mathbf{\Psi})$.
 
-By enforcing sparsity in \textbf{B}, it is able to take into account of the problem setting that we have $J >> N$, where the number of SNPs is higher than the number of samples. Also, using L-1/L-2 mixed norm penalty can also be used for joint feature selection \cite{obozinski2008high}.
+By enforcing sparsity in \textbf{B}, it is able to take into account of the problem setting that we have $J >> N$, where the number of SNPs is larger than the number of samples. Also, using L-1/L-2 mixed norm penalty can also be used for joint feature selection \cite{obozinski2008high}.
 
 
 
-Despite the simple formulation and optimization method for multiple-output regression, it does not capture the relatedness among the output variables in the data. To address this problem of learning structured sparsity and structure in output variables, Graph-guided Fused Lasso is developed with fusion penalty according to pre-computed degree of relatedness among the output \cite{kim2009statistical}. However, it needs prior knowledge of the data, which can differ by each problem setting and its problem domain. 
+Despite the simple formulation and optimization method for multiple-output regression, it does not capture the relatedness among the output variables in the data. To address this problem of learning structured sparsity and structure in output variables, Graph-guided Fused Lasso has been developed with fusion penalty according to pre-computed degree of relatedness among the output \cite{kim2009statistical}. However, it requires prior knowledge of the data, which can differ by each problem setting and its problem domain. 
 
-Rothman and coworkers \cite{rothman2010sparse} introduced Multivariate Regression with Covariance Estimation (MRCE) that aims to learn both multivariate regression parameters and the correlation of outputs. By regularizing regression parameter and correlation matrix separately, the MRCE solves bi-convex problem, which may not lead to the global optimum. Although MRCE is favorable in a way that it learns the output structure, MRCE does not force structured sparsity when learning regression parameters for inputs, which is an important property when dealing with SNPs-gene data.
+Rothman and coworkers \cite{rothman2010sparse} introduced Multivariate Regression with Covariance Estimation (MRCE) that aims to learn both multivariate regression parameters and the correlation of outputs. By regularizing regression parameter and correlation matrix separately, MRCE solves bi-convex problem, which may not lead to the global optimum. Although MRCE is favorable in a way that it learns the output structure, MRCE does not force structured sparsity when learning regression coefficients, which is an important property when dealing with SNPs-gene data.
 
 
 Sohn and coworkers \cite{sohn2012joint} introduced Sparse Gaussian Graphical Model that brings together the advantages of the two previous works by extending the problem of learning standard regression model into learning a sparse conditional Gaussian graphical model. It jointly models the input and output as a multivariate Gaussian distribution and learns the conditional model of output given input as in Eq. \ref{eq:jointG}.
@@ -136,23 +140,25 @@ Sohn and coworkers \cite{sohn2012joint} introduced Sparse Gaussian Graphical Mod
 Then, the parameters $\mathbf{\Theta}$ and $\mathbf{\Phi}$ in Eq. \ref{eq:lasso} can be reconstructed by $\mathbf{B}=\mathbf{\Sigma}_{xy}^T \mathbf{\Sigma}_{xx}^{-1}=-\mathbf{\Theta}_{yy}^{-1}\mathbf{\Theta}_{xy}^T$, and $\mathbf{\Psi}= \mathbf{\Theta}_{yy}^{-1}$.
 
 
-Although this method by Sohn suits the needs for the SNPs-gene network estimation problem as it learns both structured sparsity in $\Theta$ and output structure in $\Phi$, and formulates the problem using the standard regression problem, the underlying assumption is that both input and output data constitute of continuous variables. This assumption is from that the degree of genetic variation, the deviation from major alleles, can be measured by the number of minor alleles in a person's genotype, and the relationship between the deviation and the output is linear. However, the phenotypes from genes with 0 or 1 minor alleles can be drastically different from those of 2 minor alleles in many cases including examples from Mendel's Law.  Thus, it is reasonable approach to model SNPs as categorical, discrete values to relax this assumption in the previously developed regression models. 
+Although this method by Sohn suits the needs for the SNPs-gene network estimation problem as it learns both structured sparsity in $\mathbf{\Theta}$ and output structure in $\mathbf{\Phi}$, and formulates the problem using the standard regression problem, the underlying assumption is that both input and output data constitute of continuous variables. This assumption is from that the degree of genetic variation, the deviation from major alleles, can be measured by the number of minor alleles in a person's genotype, and the relationship between the deviation and the output is linear. However, the phenotypes from genes with 0 or 1 minor alleles can be drastically different from those of 2 minor alleles in many cases including examples from Mendel's Law.  Thus, it is reasonable approach to model SNPs as categorical, discrete values to relax this assumption in the previously developed regression models. 
 
 
-Mixed graphical models refer to graphical models that contains both discrete and continuous variables. Lauritzen and coworkers \cite{lauritzen1989graphical} combined two commonly used graphical models so that it can handle data consisting of both continuous and discrete variables as: $p(y|x) = \mathcal{N}(\mu(x), \Sigma(x))$. Despite of the novelty and specific applications of the mixed graphical model, it has not been used as widely due to its complexity in learning the parameters, and lack of intuition when derived to the other types of distributions.
+Mixed graphical models refer to graphical models that contains both discrete and continuous variables. Lauritzen and coworkers \cite{lauritzen1989graphical} combined two commonly used graphical models so that it can handle data consisting of both continuous and discrete variables as: $p(y|x) = \mathcal{N}(\mu(x), \Sigma(x))$. Despite of the novelty and specific applications of the mixed graphical model, it has not been used as widely due to its complexity in learning the parameters, and lack of intuition when reformulated to adopt various cases of data composition.
 
 
-Lee and coworkers \cite{lee2013structure} have proposed a special case of the mixed graphical model that resolves the problem of the complexity in parameter learning and vague forms of derived distributions by making several assumptions.
+Lee and coworkers \cite{lee2013structure} have proposed a special case of the mixed graphical model that resolves the problem of the complexity in parameter learning and non-intuitive reformulation of the model by making several assumptions.
 The conditional distribution of a discrete variable reduces to multi-class logistic regression, and that of a continuous variable to Gaussian linear regression.
 By sharing common covariance matrix and additive mean property, the newly proposed algorithm scales up more efficiently.
 
 
-To our knowledge, there has not been any study that learns the SNPs-gene network using mixed graphical models. In later sections, we investigate the performance of conditional mixed graphical model, whose assumption on the types of data it can handle does not violate our problem setting for SNPs-gene network estimation. 
+To our knowledge, there has not been any study that learns the SNPs-gene network using mixed graphical models. 
+In this project, we reformulate mixed graphical model to conditional form and apply it to the domain of SNPs-gene network learning.
+%In later sections, we investigate the performance of conditional mixed graphical model, whose assumption on the types of data it can handle does not violate our problem setting for SNPs-gene network estimation. 
 
 
 \section{Methods}
 \label{Methods}
-Our goal is to improve the method of learning SNP-gene network by adopting the conditional undirected mixed graphical model in which we can embed both discrete variables for SNPs and continuous variables for gene expression rates.
+Our goal is to improve the method of learning SNPs-gene network by adopting the conditional undirected mixed graphical model in which we can embed both discrete variables for SNPs and continuous variables for gene expression rates.
 
 \subsection{Mixed Graphical Model}
 Lee and coworkers \cite{lee2013structure} proposed a mixed graphical model of discrete and continuous variables, where the joint distribution is expressed as:
@@ -168,7 +174,7 @@ The parameters are $\Theta = [\{\phi_{kl}\}, \{\rho_{k}\}, \{\alpha_{s}\}, \{\be
 By making further assumptions on mixed graphical models originally introduced in \cite{lauritzen1989graphical}, the mixed graphical model \ref{eq:joint} proposed by Lee \cite{lee2013structure} yields intuitive results when reformulated into various forms of distributions. The conditional distribution of continuous variables and discrete variables given the rest reduces to Gaussian linear regression, and multi-class logistic regression, respectively. Furthermore, when the data consists of continuous and discrete variables only, the model reduces to multivariate Gaussian model, and pairwise discrete Markov random field, respectively. 
 
 \subsection{Conditional Mixed Graphical Model}
-We are interested in learning the SNP-gene network structure, and the conditional distribution of the gene expression, given observed SNPs.
+We are interested in learning the SNPs-gene network structure, and the conditional distribution of the gene expression, given observed SNPs.
 Therefore, we only need to focus on learning the conditional distribution of the network rather than learning the full joint distribution. 
 
 The conditional distribution of continuous variables given discrete variables of the mixed graphical model in \cite{lee2013structure} reduces to the form of multivariate Gaussian distribution.
@@ -186,12 +192,12 @@ From the property of multivariate Gaussian distribution, the log likelihood of t
 \log p(y | x; \Theta) &= -\frac{1}{2}\log |B^{-1}| -\frac{k}{2} (2 \pi) \nonumber    \\
 & -\frac{1}{2} (y - B^{-1} \gamma(x)^\intercal B (y - B^{-1} \gamma(x)) \label{eq:loglikli} \\ 
 l_p(\Theta) &= -\frac{1}{2} tr\Big((Y - B^{-1} \Gamma(X))^\intercal B (Y - B^{-1} \Gamma(X)) \Big) \nonumber \\
-& -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\rho_{ks}\}\|_1 \label{eq:obj}
+& -\frac{N}{2} \log|B^{-1}| + \lambda_1 \|\{\beta_{st}\}\|_1 + \lambda_2 \|\{\rho_{ks}\}\|_2 \label{eq:obj}
 \end{align}
 
 The parameter $\Theta^*$ that minimizes this L-1 penalized log-likelihood will give us a sparse and consistent estimator, and by comparing the parameters with results in multi-task regression settings, we can analyze the existence of direct and indirect relationship between SNPs and gene expression rates.
 
-For the parameter estimation, we minimize the negative log-likelihood expressed in product of each variable given the rest as follows:
+For the parameter estimation, we minimize the negative log pseudo-likelihood expressed in product of each variable given the rest as follows:
 \begin{align}
 \tilde{l}(\Theta |y) = - \sum_{s=1}^{p} \log p(y_s |y_{\setminus s}, x;\Theta),
 \end{align}
@@ -206,9 +212,9 @@ where from \ref{eq:joint}, $p(y_s |y_{\setminus s}, x;\Theta)$ can be reformulat
 
 \subsection{Optimization}
 For the optimization, proximal Newton method \cite{schmidt2010graphical,schmidt2011projected} is used. Proximal Netwon optimization method breaks down the optimization problem into $f(x) + g(x)$, where $f(x)$ is smooth and convex function, and $g(x)$ is a convex function, but not necessarily smooth. 
-In our problem, functions $f(x)$ and $g(x)$ correspond to the negative log-likelihood and sparsity constraint, respectively.
+In our problem, functions $f(x)$ and $g(x)$ correspond to the negative log-likelihood and penalty terms, respectively.
 
-Proximal Newton method is an extension of proximal gradient method that considers the second order information of $f(x)$ instead of the first order.
+Proximal Newton method is an extension of proximal gradient method that considers the second order information of $f(x)$ in addition to the first order information.
 The proximal gradient seeks next point by computing $x_{k+1} = prox_t (x_k - t \bigtriangledown(x_k))$, where $prox_t(x)=\text{argmin}_u(\frac{1}{2t}{\|x-u\|}^2 + g(u))$, and $t$ is chosen by Armijo line search algorithm. In proximal Newton method, $Hprox$ is used, where the $prox$ operator is extended to $\| \cdot \|_H$, where $H=\bigtriangledown^2 f(x_k)$. For each iteration, proximal Newton method finds the next point that minimizes below function.
 \begin{align}
   &\bigtriangledown f(x_k)^T(u-x_k)+\frac{1}{2t}(u+x_k)^TH(u-w_k)+g(u) \nonumber    \\
@@ -223,16 +229,16 @@ We used PNOPT package \cite{lee2012proximal} for implementation of proximal Newt
 
 
 \section{Experiments}
-
+\label{Experiments}
 
 % % % begin
 % % % added for final
-\subsection{Synthetic Experiments}
+\subsection{Experiments on Synthetic Data}
 Before delving into real-world dataset, we run experiments on synthetic data to verify our assumptions on the behavior of our proposed model.
 
 
 \subsubsection{Synthetic Data Generation}
-We create a simple model as a ground truth with 7 discrete variables (input) and 5 continuous variables (output).
+We create a simple ground truth model with 7 discrete variables (input) and 5 continuous variables (output).
 We design the discrete variables to have three possible states to reflect the nature of SNPs. We construct a chain structure for the discrete variables, where each node is linked to the following node. For two consecutive nodes that are connected by an edge, with probability of 0.5, we create a state-to-state interactions as following with 
 
 \begin{align*}
@@ -242,10 +248,10 @@ We design the discrete variables to have three possible states to reflect the na
   1 & 0 & -1 \\
   0 & 1 & 0 \\
   -1 & 0 & 1
-\end{bmatrix}
+\end{bmatrix}.
 \end{align*}
 
-The continuous variables are designed to have symmetric interactions between the nodes, where we generate random values for node-to-node interaction in range of [-1, 1], and remove the edge with probability of $0.7$ maintaining the positive semi-definteness of the matrix. 
+The continuous variables are designed to have symmetric interactions between the nodes, where we generate random values for node-to-node interaction in range of [-1, 1], and remove the edge with probability of $0.7$ maintaining the positive semi-definiteness of the matrix. 
 For the input-output interaction, we randomly create edges with probability of $0.2$. 
 In order to reflect our assumption on the nature of SNPs-gene data, and therefore verify that our proposed model excels in performance under this assumption, we design the interactions between discrete and continuous variables that are linked via an edge to be increasing in non-linear manner with respect to the index of the states;
 we define the interactions between three states of the discrete variable and the continuous variable to be in non-linear relationship as follows: 1 to 1.2 to 6.
@@ -364,7 +370,7 @@ From this experimental result, we can conclude that our proposed model excels in
 
 
 \subsection{Experiments on Human Liver Cohort Data}
-For learning the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} \footnote{The dataset is downloadable at \url{ https://www.synapse.org/\#!Synapse:syn4499}}. Out of 427 patients with more than 40,000 expression rates and more than 700,000 SNPs in the given data, we first extract 178 samples that contain both information on genotype and expression rates. To focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is greater than 0.05 and SNPs on chromosome 6 with minor allele frequency greater than 0.01 and pair-wise correlation less than 0.1 to select genes that are not too biased to have major allele and not too related each other according to dbSNP\footnote{\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}}. For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables with three states (0, 1, 2) and expression rates are to be continuous variables in our model. We use 143 samples for training and the remaining 35 samples for testing. For hyperparameter selection, we use 3-fold cross-validation on mean squared error.
+For learning the eQTL mapping between SNPs and the expression rates of the related genes, we use the data from Human Liver Cohort(HLC) study \cite{schadt2008mapping} \footnote{The dataset is available at \url{ https://www.synapse.org/\#!Synapse:syn4499}}. Out of 427 patients with more than 40,000 expression rates and more than 700,000 SNPs in the given data, we first extract 178 samples that contain both information on genotype and expression rates. To focus on learning of the structure of the model rather than handling the huge dimension of this dataset, we focus on smaller subset of genes and expression rates as in the work of Sohn and coworker \cite{sohn2012joint}. We consider only expression rates whose variance is greater than 0.05 and SNPs on chromosome 6 with minor allele frequency greater than 0.01 and pair-wise correlation less than 0.1 to select genes that are not too biased to have major allele and not too related each other according to dbSNP\footnote{\url{http://www.ncbi.nlm.nih.gov/projects/SNP/}}. For a single nucleotide, where major allele is X and minor is Y, SNPs are encoded to categorical variables as XX = 0, XY = 1, YY = 2. SNPs are considered to be discrete variables with three states \{0, 1, 2\} and expression rates are to be continuous variables in our model. We use 143 samples for training and the remaining 35 samples for testing. For hyperparameter selection, we use 3-fold cross-validation on mean squared error.
 
 
 \begin{table}
@@ -384,7 +390,7 @@ For learning the eQTL mapping between SNPs and the expression rates of the relat
 \label{table:real_large}
 \end{table}
 
-The prediction error on our model and other baseline models are in Table \ref{table:real_large}. Our method shows lower average prediction error than SCGGM, and this shows that our assumption on genetic variation can be confirmed: the phenotypes of 0 or 1 minor alleles can be drastically different from those with 2 minor alleles, and we need discrete models for SNPs. But the traditional multi-task regression methods (Lasso, MTLasso) shows error much closer to zero. We find the explanation of this discrepancy in error from the sparsity in the parameters in each learned model. The learned coefficient matrix $\textbf{B}$ of Lasso and MTLasso has all non-zero entries, but the input-output mapping learned from MG and SCGGM has very high sparsity. Thus, we see that the Lasso and MTLasso methods make a trade-off for better prediction errors with far less interpretability, and SCGGM and MG converge to a state with very sparse model, only using output-output relationships for better prediction error. We also conjecture that the relatively high sample complexity for our model might be an obstacle for better structure learning. We wanted to further analyze the performance of our method varying settings including hyperparameter candidates and metrics for cross-validation steps, but the learning of our model takes about a week and could not analyze other behaviors on this dataset.
+The prediction error on our model and other baseline models are shown in Table \ref{table:real_large}. Our method shows lower average prediction error than SCGGM, and from this, our assumption on genetic variation can be confirmed: the phenotypes of 0 or 1 minor alleles can be drastically different from those with 2 minor alleles, and we need discrete models for SNPs. But the traditional multi-task regression methods (Lasso, MTLasso) shows errors much closer to zero. We find the explanation of this discrepancy in error from the sparsity in the parameters in each learned model. The learned coefficient matrix $\textbf{B}$ of Lasso and MTLasso has all non-zero entries, but the input-output mapping learned from MG and SCGGM has very high sparsity. Thus, we see that the Lasso and MTLasso methods make a trade-off for better prediction errors with far less interpretability, and SCGGM and MG converge to a state with very sparse model, only using output-output relationships for better prediction error. We also conjecture that the relatively high sample complexity for our model might be an obstacle for better structure learning. We wanted to further analyze the performance of our method varying settings including hyperparameter candidates and metrics for cross-validation steps, but the learning of our model takes about a week and could not analyze other behaviors on this dataset.
 
 To analyze the behaviors of our model further, we conduct the experiment on selected SNPs and gene expression rates for smaller dimensions. We strengthen the threshold for the selection of SNPs and selected fewer SNPs for our study. We select 36 SNPs with pair-wise correlation is less than 0.01 instead of 0.1. For gene expression rates, we focus on 9 HLA Class II genes following the findings from the previous study \cite{burton2007genome}. The number of samples for training and test and the model selection method are the same as the previous experiment.
 
@@ -401,16 +407,17 @@ To analyze the behaviors of our model further, we conduct the experiment on sele
     \hline 
     \end{tabular}
 \end{center}
-\caption{Average prediction error on selected SNPs and genes from Human Liver Cohort. from Conditional Mixed Graphical Model (MG), Sparse Conditional Gaussian Graphical Model (SCGGM), Lasso, Multi-task Lasso with joint feature selection (MTLasso). The number of SNPs selected is 36 and the number of proteins for expression rates is 9.}
+\caption{Average prediction error on selected SNPs and genes from Human Liver Cohort data from Conditional Mixed Graphical Model (MG), Sparse Conditional Gaussian Graphical Model (SCGGM), Lasso, Multi-task Lasso with joint feature selection (MTLasso). The number of SNPs selected is 36 and the number of proteins for expression rates is 9.}
 \label{table:real_small}
 \end{table}
 
-The prediction error on our model and other baseline models on smaller dataset are in Table \ref{table:real_small}. The prediction errors of SCGGM and our model are worse than that of Lasso, and MTLasso. The sparsity patterns in the coefficient matrix learned from Lasso and MTLasso, and input-output relationship learned from SCGGM and our model are the same as previous experiment. 
+The prediction error on our model and other baseline models on smaller dataset are shown in Table \ref{table:real_small}. The prediction errors of SCGGM and our model are worse than that of Lasso, and MTLasso. The sparsity patterns in the coefficient matrix learned from Lasso and MTLasso, and input-output relationship learned from SCGGM and our model are the same as previous experiment. 
 
 
 
 \section{Conclusion}
-In this project, we adopt conditional mixed graphical model for a better generative model in learning the eQTL mapping in SNPs-gene networks. Our proposed model has two advantages: 1) the relaxation of unnatural assumption in encoding of SNPs in sparse CGGM and 2) the unnecessity of prior knowledge among correlated gene expression rates in each problem settings. Our assumption in the SNPs-gene network is that phenotypes of 0 or 1 minor alleles can be drastically different from those of 2 minor alleles. In synthetic experiments, we confirm that our model outperforms both in prediction error and edge recovery rate when given the data following our assumption. In experiments on Human Liver Cohort dataset, it is hard to decide whether our model performs better than the other baseline models including sparse CGGM and multiple-output regression models, and we conjecture that this is due to relatively high sample complexity of our model. The future work includes developing a faster optimization method than PNOPT and incorporating more refined form of regularization for the discovery of other types of structured sparsity patterns in the network.
+\label{Conclusion}
+In this project, we adopted conditional mixed graphical model for a better generative model in learning the eQTL mapping in SNPs-gene networks. Our assumption in the SNPs-gene network is that phenotypes of 0 or 1 minor alleles can be drastically different from those of 2 minor alleles. We reflected our assumption on the nature of the problem domain into our proposed model structure. Our proposed model has two advantages: 1) the relaxation of unnatural assumption in encoding of SNPs in sparse CGGM and 2) the unnecessity of prior knowledge among correlated gene expression rates in each problem settings. In synthetic experiments, we confirmed that our model outperforms both in prediction error and edge recovery rate when given the data following our assumption. In experiments on Human Liver Cohort dataset, it was hard to decide whether our model performs better than the other baseline models including sparse CGGM and multiple-output regression models, and we conjecture that this is due to relatively high sample complexity of our model. The future work includes developing a faster optimization method than PNOPT and incorporating more refined form of regularization for the discovery of other types of structured sparsity patterns in the network.
 
 
 
